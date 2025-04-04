@@ -1,28 +1,23 @@
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Roboto_Mono } from 'next/font/google'
 
 import '@workspace/ui/globals.css'
 import { Providers } from '@/components/providers'
 
-const fontSans = Geist({
-	subsets: ['latin'],
-	variable: '--font-sans',
-})
-
-const fontMono = Geist_Mono({
-	subsets: ['latin'],
+const fontRoboto = Roboto_Mono({
+	subsets: ['latin', 'cyrillic'],
 	variable: '--font-mono',
+	weight: ['400', '700'],
+	display: 'swap',
 })
 
-export default function RootLayout({
+export default function ArticlesLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode
 }>) {
 	return (
 		<html lang='ru' suppressHydrationWarning>
-			<body
-				className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
-			>
+			<body className={`${fontRoboto} font-sans antialiased bg-gray-200`}>
 				<Providers>{children}</Providers>
 			</body>
 		</html>

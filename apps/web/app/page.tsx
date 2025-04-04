@@ -11,17 +11,6 @@ export default function Page() {
 
 	return (
 		<div className='min-h-[100vh] flex flex-col justify-center items-center'>
-			<button
-				onClick={() => {
-					const res = fetch('http://127.0.0.1:8080/cookie-test/set', {
-						method: 'GET',
-						credentials: 'include',
-					})
-					console.log(res)
-				}}
-			>
-				qwe
-			</button>
 			<div className='border bg-card rounded flex flex-col items-center shadow h-max w-80'>
 				<div className='flex items-start w-[100%] gap-4 text-primary mb-8 p-4'>
 					<p

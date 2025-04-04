@@ -123,3 +123,14 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+/* Глобальное отключение outline для всех элементов */
+*:focus {
+	outline: none !important;
+}
+
+/* Специфично для ProseMirror (внутренняя реализация Tiptap) */
+.ProseMirror:focus {
+	outline: none !important;
+	box-shadow: none !important;
+}
