@@ -3,6 +3,7 @@
 import { useRef } from 'react'
 import { IArticle } from '../../interfaces'
 import ArticleDialog from './articleDialog'
+import { formatDate } from '@/lib/utils'
 
 interface Props {
 	article: IArticle
@@ -12,33 +13,42 @@ export default function Article({ article }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null)
 
 	return (
-		<article
-			className='w-[32%] flex flex-col p-4 bg-white mt-4 rounded-4xl shadow cursor-pointer'
-			onClick={() => {
-				if (dialogRef.current) {
-					dialogRef.current.showModal()
-				}
-			}}
-		>
-			<div>
-				<img
-					src={article.imagePath}
-					alt={article.title}
-					className='rounded-4xl select-none'
-				/>
+		<div className='relative h-full flex flex-col'>
+			{/* Карточка статьи */}
+			<div
+				className='h-full flex flex-col bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer'
+				onClick={() => dialogRef.current?.showModal()}
+			>
+				{/* Обложка */}
+				<div className='aspect-[4/3] bg-gray-100 overflow-hidden'>
+					<img
+						src={article.imagePath}
+						alt={article.title}
+						className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
+					/>
+				</div>
+
+				{/* Контент */}
+				<div className='p-4 flex flex-col flex-grow'>
+					{/* Заголовок */}
+					<h3 className='font-semibold text-lg mb-3 line-clamp-2'>
+						{article.title}
+					</h3>
+
+					{/* Мета-информация */}
+					<div className='mt-auto pt-3 border-t-1 border-gray-200'>
+						<div className='text-sm text-gray-500 mb-1'>
+							{formatDate(article.createAt)}
+						</div>
+						<div className='text-sm text-gray-600'>
+							<span className='text-gray-400'>Редактор: </span>
+							{article.updatedBy.surname} {article.updatedBy.name.charAt(0)}.
+						</div>
+					</div>
+				</div>
 			</div>
-			<div className='mt-2'>
-				<h1 className='text-2xl'>{article.title}</h1>
-				<p>Дата создания: {article.createAt}</p>
-				<p>
-					Последнее редактирование:{' '}
-					<span>
-						{article.updatedBy.surname} {article.updatedBy.name}{' '}
-						{article.updatedBy.surname}
-					</span>
-				</p>
-			</div>
+
 			<ArticleDialog dialogRef={dialogRef} articleId={article.id} />
-		</article>
+		</div>
 	)
 }

@@ -64,101 +64,116 @@ export default function AddArticleDialog({ dialogRef }: Props) {
 	return (
 		<dialog
 			ref={dialogRef}
-			className='fixed inset-0 m-auto p-6 rounded-4xl shadow-xl backdrop:bg-black/50 w-full max-w-2xl'
+			className='fixed inset-0 m-auto p-0 rounded-xl shadow-2xl backdrop:bg-black/50 w-full max-w-3xl bg-white animate-fade-in overflow-auto'
 		>
-			<div className='space-y-4'>
-				<h2 className='text-2xl font-bold text-primary'>
-					Добавить новую статью
-				</h2>
+			<div className='relative'>
+				{/* Заголовок и кнопка закрытия */}
+				<div className='sticky top-0 z-10 bg-white p-6 pb-4 border-b flex justify-between items-start'>
+					<h2 className='text-2xl font-bold text-gray-800'>Новая статья</h2>
+					<button
+						onClick={handleClose}
+						className='text-gray-400 hover:text-gray-600 transition-colors cursor-pointer'
+						aria-label='Закрыть'
+					>
+						<CloseIcon className='w-6 h-6' />
+					</button>
+				</div>
 
-				<form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-					<div className='w-full flex flex-col items-center justify-center gap-4'>
-						<div className='w-full'>
-							<label htmlFor='image' className='block mb-1 font-medium'>
-								Обложка статьи
-							</label>
-							<div className='relative'>
-								<input
-									id='image'
-									type='file'
-									accept='image/*'
-									className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
-									{...register('image', {
-										onChange: handleFileChange,
-									})}
-								/>
-								<div className='flex items-center justify-between p-2 border rounded gap-2'>
-									<span className='text-gray-500'>{fileInputLabel}</span>
-									<button
-										type='button'
-										className='px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200'
-										onClick={e => {
-											e.preventDefault()
-											document.getElementById('image')?.click()
-										}}
-									>
-										Обзор
-									</button>
-								</div>
-							</div>
-							{!imagePreview && (
-								<p className='mt-1 text-sm text-gray-500'>Файл не выбран</p>
-							)}
-							{imagePreview && previewUrl && (
-								<div className='mt-4'>
-									<img
-										src={previewUrl}
-										alt='Preview'
-										className='max-h-40 rounded object-cover mx-auto'
+				<form onSubmit={handleSubmit(onSubmit)} className='p-6 space-y-6'>
+					{/* Блок обложки */}
+					<div className='space-y-4'>
+						<label className='block text-sm font-medium text-gray-700'>
+							Обложка статьи
+						</label>
+						<div className='flex items-center gap-4'>
+							<label className='flex-1 cursor-pointer'>
+								<div className='relative group'>
+									<div className='aspect-video bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group-hover:border-blue-400 transition-colors duration-200 flex items-center justify-center'>
+										{previewUrl ? (
+											<img
+												src={previewUrl}
+												alt='Preview'
+												className='w-auto h-full object-contain rounded-lg'
+											/>
+										) : (
+											<div className='w-full h-full flex items-center justify-center text-gray-400'>
+												<UploadIcon className='w-10 h-10' />
+											</div>
+										)}
+									</div>
+									<input
+										type='file'
+										accept='image/*'
+										className='absolute inset-0 opacity-0 cursor-pointer'
+										{...register('image', {
+											onChange: handleFileChange,
+										})}
 									/>
 								</div>
-							)}
-						</div>
-
-						<div className='w-full'>
-							<label
-								htmlFor='title'
-								className='block mb-1 font-medium text-primary'
-							>
-								Название статьи*
 							</label>
-							<input
-								id='title'
-								type='text'
-								className={`w-full p-2 border rounded ${errors.title ? 'border-red-500' : ''}`}
-								{...register('title', { required: 'Это поле обязательно' })}
-							/>
-							{errors.title && (
-								<p className='mt-1 text-sm text-red-500'>
-									{errors.title.message}
+							<div className='flex-1 space-y-2'>
+								<p className='text-sm text-gray-500'>
+									{imagePreview?.name || 'Файл не выбран'}
 								</p>
-							)}
+								<p className='text-xs text-gray-400'>
+									Рекомендуемый размер: 1200×630px
+								</p>
+							</div>
 						</div>
 					</div>
 
-					<div className='w-full'>
-						<label className='block mb-1 font-medium text-primary'>
+					{/* Поле названия */}
+					<div className='space-y-2'>
+						<label
+							htmlFor='title'
+							className='block text-sm font-medium text-gray-700'
+						>
+							Название статьи *
+						</label>
+						<input
+							id='title'
+							type='text'
+							className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
+								errors.title ? 'border-red-500' : 'border-gray-300'
+							}`}
+							{...register('title', { required: 'Это поле обязательно' })}
+						/>
+						{errors.title && (
+							<p className='mt-1 text-sm text-red-500'>
+								{errors.title.message}
+							</p>
+						)}
+					</div>
+
+					{/* Редактор контента */}
+					<div className='space-y-2'>
+						<label className='block text-sm font-medium text-gray-700'>
 							Содержание статьи
 						</label>
-						<div className='border rounded p-2 min-h-[300px]'>
+						<div className='border border-gray-200 rounded-lg overflow-hidden shadow-sm'>
 							<Edit content={watch('content')} onChange={handleContentChange} />
 						</div>
 					</div>
 
-					<div className='flex justify-end space-x-3 pt-4'>
+					{/* Кнопки действий */}
+					<div className='flex justify-end gap-3 pt-4 border-t border-gray-100'>
 						<button
 							type='button'
 							onClick={handleClose}
-							className='px-4 py-2 border rounded hover:bg-gray-100'
+							className='px-6 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer'
 						>
 							Отмена
 						</button>
 						<button
 							type='submit'
-							className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50'
+							className={`px-6 py-2 text-white rounded-lg transition-colors cursor-pointer ${
+								isValid
+									? 'bg-blue-600 hover:bg-blue-700'
+									: 'bg-gray-400 cursor-not-allowed'
+							}`}
 							disabled={!isValid}
 						>
-							Сохранить
+							Опубликовать
 						</button>
 					</div>
 				</form>
@@ -166,3 +181,36 @@ export default function AddArticleDialog({ dialogRef }: Props) {
 		</dialog>
 	)
 }
+
+// Иконки
+const CloseIcon = ({ className }: { className?: string }) => (
+	<svg
+		className={className}
+		fill='none'
+		viewBox='0 0 24 24'
+		stroke='currentColor'
+	>
+		<path
+			strokeLinecap='round'
+			strokeLinejoin='round'
+			strokeWidth={2}
+			d='M6 18L18 6M6 6l12 12'
+		/>
+	</svg>
+)
+
+const UploadIcon = ({ className }: { className?: string }) => (
+	<svg
+		className={className}
+		fill='none'
+		viewBox='0 0 24 24'
+		stroke='currentColor'
+	>
+		<path
+			strokeLinecap='round'
+			strokeLinejoin='round'
+			strokeWidth={2}
+			d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12'
+		/>
+	</svg>
+)

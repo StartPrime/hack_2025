@@ -65,7 +65,6 @@ export default function Articles() {
 		<main className='my-8'>
 			<Container>
 				<section>
-					<h1 className='text-2xl font-bold'>Статьи</h1>
 					<ArticleContainer articles={articles} />
 				</section>
 			</Container>

@@ -124,13 +124,36 @@
 	}
 }
 
-/* Глобальное отключение outline для всех элементов */
 *:focus {
 	outline: none !important;
 }
 
-/* Специфично для ProseMirror (внутренняя реализация Tiptap) */
 .ProseMirror:focus {
 	outline: none !important;
 	box-shadow: none !important;
+}
+
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: #f1f1f1;
+	border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #888;
+	border-radius: 4px;
+	transition: background 0.3s;
+}
+
+/* Ползунок при наведении */
+::-webkit-scrollbar-thumb:hover {
+	background: #555;
+}
+
+::-webkit-scrollbar-corner {
+	background: transparent;
 }

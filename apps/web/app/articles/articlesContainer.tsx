@@ -13,23 +13,43 @@ export default function ArticleContainer({ articles }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null)
 
 	return (
-		<div className='flex gap-[2%] flex-wrap'>
-			<article className='w-[32%] flex items-center justify-center p-4 bg-white mt-4 rounded-4xl shadow '>
-				<p
-					className='text-2xl text-primary cursor-pointer duration-200 hover:scale-105'
-					onClick={() => {
-						if (dialogRef.current) {
-							dialogRef.current.showModal()
-						}
-					}}
+		<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+			{/* Заголовок и кнопка */}
+			<div className='flex justify-between items-center mb-8'>
+				<h1 className='text-2xl font-bold text-gray-900'>Статьи</h1>
+				<button
+					onClick={() => dialogRef.current?.showModal()}
+					className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 cursor-pointer'
 				>
-					Добавить статью +
-				</p>
-			</article>
-			{articles.map(article => (
-				<Article key={article.id} article={article} />
-			))}
+					<PlusIcon className='w-5 h-5' />
+					<span>Добавить статью</span>
+				</button>
+			</div>
+
+			{/* Сетка статей */}
+			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+				{articles.map(article => (
+					<Article key={article.id} article={article} />
+				))}
+			</div>
+
 			<AddArticleDialog dialogRef={dialogRef} />
 		</div>
 	)
 }
+
+const PlusIcon = ({ className }: { className?: string }) => (
+	<svg
+		className={className}
+		fill='none'
+		viewBox='0 0 24 24'
+		stroke='currentColor'
+	>
+		<path
+			strokeLinecap='round'
+			strokeLinejoin='round'
+			strokeWidth={2}
+			d='M12 6v6m0 0v6m0-6h6m-6 0H6'
+		/>
+	</svg>
+)

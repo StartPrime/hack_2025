@@ -12,10 +12,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@tiptap/extension-bullet-list": "^2.11.7",
     "@tiptap/extension-code-block-lowlight": "^2.11.7",
     "@tiptap/extension-color": "^2.11.7",
     "@tiptap/extension-highlight": "^2.11.7",
     "@tiptap/extension-image": "^2.11.7",
+    "@tiptap/extension-list-item": "^2.11.7",
+    "@tiptap/extension-ordered-list": "^2.11.7",
     "@tiptap/extension-table": "^2.11.7",
     "@tiptap/extension-text-align": "^2.11.7",
     "@tiptap/extension-text-style": "^2.11.7",
@@ -24,6 +27,7 @@
     "@tiptap/react": "^2.11.7",
     "@tiptap/starter-kit": "^2.11.7",
     "@workspace/ui": "workspace:*",
+    "clsx": "^2.1.1",
     "draft-js": "^0.11.7",
     "highlight.js": "^11.11.1",
     "lowlight": "^3.3.0",
