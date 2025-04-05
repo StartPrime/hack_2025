@@ -4,11 +4,12 @@
 import { RefObject, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Edit from '@/lib/edit'
-import { ITask, IDetailedTask, TaskStatus, Priority } from '@/interfaces'
+import { TaskStatus, Priority } from '@/interfaces'
+import { apiClient } from '@/fetch/apiClient'
 
 interface User {
 	id: number
-	name: string
+	firstName: string
 	surname: string
 	middleName: string
 }
@@ -38,7 +39,6 @@ export default function CreateTaskDialog({ dialogRef }: Props) {
 		formState: { errors },
 		setValue,
 		watch,
-		reset,
 	} = useForm<FormData>({
 		defaultValues: {
 			title: '',
@@ -56,27 +56,9 @@ export default function CreateTaskDialog({ dialogRef }: Props) {
 			setIsUsersLoading(true)
 			try {
 				// Заглушка для запроса пользователей
-				await new Promise(resolve => setTimeout(resolve, 500))
+				const users: User[] = await apiClient('/users/', { method: 'GET' })
 
-				// Статичные тестовые данные
-				const mockUsers: User[] = [
-					{ id: 1, name: 'Иван', surname: 'Иванов', middleName: 'Иванович' },
-					{ id: 2, name: 'Петр', surname: 'Петров', middleName: 'Петрович' },
-					{
-						id: 3,
-						name: 'Сергей',
-						surname: 'Сергеев',
-						middleName: 'Сергеевич',
-					},
-					{
-						id: 4,
-						name: 'Алексей',
-						surname: 'Алексеев',
-						middleName: 'Алексеевич',
-					},
-				]
-
-				setUsers(mockUsers)
+				setUsers(users)
 			} catch (error) {
 				console.error('Ошибка при загрузке пользователей:', error)
 			} finally {
@@ -108,7 +90,7 @@ export default function CreateTaskDialog({ dialogRef }: Props) {
 
 	const filteredUsers = users.filter(user => {
 		const fullName =
-			`${user.surname} ${user.name} ${user.middleName}`.toLowerCase()
+			`${user.surname} ${user.firstName} ${user.middleName}`.toLowerCase()
 		return fullName.includes(searchTerm.toLowerCase())
 	})
 
@@ -162,7 +144,7 @@ export default function CreateTaskDialog({ dialogRef }: Props) {
 									className='w-full px-4 py-2 border rounded bg-gray-50 cursor-pointer'
 									onClick={() => setShowUserDropdown(!showUserDropdown)}
 								>
-									{`${assignedTo.surname} ${assignedTo.name} ${assignedTo.middleName}`}
+									{`${assignedTo.surname} ${assignedTo.firstName} ${assignedTo.middleName}`}
 								</div>
 							) : (
 								<div className='relative'>
@@ -191,7 +173,7 @@ export default function CreateTaskDialog({ dialogRef }: Props) {
 												className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
 												onClick={() => handleUserSelect(user)}
 											>
-												{`${user.surname} ${user.name} ${user.middleName}`}
+												{`${user.surname} ${user.firstName} ${user.middleName}`}
 											</div>
 										))
 									) : (
