@@ -10,17 +10,17 @@ import Link from 'next/link'
 export default function Header() {
 	const pathname = usePathname()
 
-	const isInfoActive = pathname === '/articles'
-	const isTasksActive = pathname === '/tasks'
-	const isAdminActive = pathname === '/admin'
+	const isInfoActive = pathname === '/modules/articles'
+	const isTasksActive = pathname === '/modules/tasks'
+	const isAdminActive = pathname === '/modules/admin'
 
 	return (
 		<header className='mt-4'>
 			<Container>
 				<nav className='flex justify-end gap-8'>
 					<Link
-						href='/articles'
-						className={`cursor-pointer duration-200 hover:scale-105 flex gap-1 items-center justify-center ${
+						href='/modules/articles'
+						className={`cursor-pointer flex gap-1 items-center justify-center ${
 							isInfoActive ? 'text-primary  underline' : 'text-primary'
 						}`}
 					>
@@ -29,8 +29,8 @@ export default function Header() {
 					</Link>
 
 					<Link
-						href='/tasks'
-						className={`cursor-pointer duration-200 hover:scale-105 flex gap-1 items-center justify-center ${
+						href='/modules/tasks'
+						className={`cursor-pointer flex gap-1 items-center justify-center ${
 							isTasksActive
 								? 'text-primary font-bold underline'
 								: 'text-primary'
@@ -41,8 +41,8 @@ export default function Header() {
 					</Link>
 
 					<Link
-						href='/admin'
-						className={`cursor-pointer duration-200 hover:scale-105 flex gap-1 items-center justify-center ${
+						href='/modules/admin'
+						className={`cursor-pointer flex gap-1 items-center justify-center ${
 							isAdminActive
 								? 'text-primary font-bold underline'
 								: 'text-primary'

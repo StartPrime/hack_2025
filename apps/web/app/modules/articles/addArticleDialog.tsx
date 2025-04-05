@@ -2,9 +2,10 @@
 
 import { RefObject, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import Edit from './edit'
-import { CloseIcon, UploadIcon } from '../../lib/icons'
+import Edit from '@/lib/edit'
+import { CloseIcon, UploadIcon } from '@/lib/icons'
 import { IDetailedArticle } from '@/interfaces'
+import { apiClient } from '@/fetch/apiClient'
 
 interface IArticleForm {
 	title: string
@@ -36,25 +37,39 @@ export default function AddArticleDialog({ dialogRef, article }: Props) {
 	})
 
 	const [fileInputLabel, setFileInputLabel] = useState(
-		isEditMode ? article.imagePath : 'Выберите файл'
+		isEditMode ? article.image : 'Выберите файл'
 	)
 	const imagePreview = watch('image')?.[0]
 	const previewUrl = imagePreview
 		? URL.createObjectURL(imagePreview)
 		: isEditMode
-			? article.imagePath
+			? article.image
 			: null
 
-	const onSubmit = (data: IArticleForm) => {
+	const onSubmit = async (data: IArticleForm) => {
 		console.log('Данные формы:', {
-			title: data.title,
-			content: data.content,
 			image:
-				data.image?.[0]?.name ||
-				(isEditMode ? article.imagePath : 'Не выбрано'),
+				data.image?.[0]?.name || (isEditMode ? article.image : 'Не выбрано'),
 		})
 
+		const pushData = { title: data.title, content: data.content }
+
+		type TResOne = {
+			id: string
+		}
+
 		if (!isEditMode) {
+			try {
+				const resOne: TResOne = await apiClient('/articles/', {
+					method: 'POST',
+					body: JSON.stringify(pushData),
+				})
+				if (resOne && data.image?.[0]) {
+					const resSecond = await apiClient(
+						`/articles/${resOne.id}/upload_image/`
+					)
+				}
+			} catch {}
 			reset()
 		}
 		dialogRef.current?.close()
@@ -71,7 +86,7 @@ export default function AddArticleDialog({ dialogRef, article }: Props) {
 		if (e.target.files?.[0]) {
 			setFileInputLabel(e.target.files[0].name)
 		} else {
-			setFileInputLabel(isEditMode ? article.imagePath : 'Выберите файл')
+			setFileInputLabel(isEditMode ? article.image : 'Выберите файл')
 		}
 	}
 

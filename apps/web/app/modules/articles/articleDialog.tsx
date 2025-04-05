@@ -12,7 +12,7 @@ interface Props {
 
 const testArticle: IDetailedArticle = {
 	id: 5,
-	imagePath: '/i.webp',
+	image: '/i.webp',
 	title: 'Лучшие практики работы с Git',
 	createAt: '04.04.2025',
 	content: `
@@ -26,7 +26,7 @@ const testArticle: IDetailedArticle = {
     <h2>Рекомендации</h2>
     <p>Всегда пишите осмысленные сообщения коммитов.</p>
   `,
-	updatedBy: {
+	updateBy: {
 		name: 'Сергей',
 		surname: 'Иванов',
 		middleName: 'Петрович',
@@ -94,7 +94,7 @@ export default function ArticleDialog({ dialogRef, articleId }: Props) {
 						{/* Обложка статьи */}
 						<div className='mb-6 rounded-lg overflow-hidden'>
 							<img
-								src={testArticle.imagePath}
+								src={testArticle.image}
 								alt={testArticle.title}
 								className='w-full h-auto max-h-96 object-cover'
 							/>
@@ -147,8 +147,8 @@ export default function ArticleDialog({ dialogRef, articleId }: Props) {
 										/>
 									</svg>
 									<span>
-										Редактор: {testArticle.updatedBy.surname}{' '}
-										{testArticle.updatedBy.name.charAt(0)}.
+										Редактор: {testArticle.updateBy.surname}{' '}
+										{testArticle.updateBy.name.charAt(0)}.
 									</span>
 								</div>
 							</div>

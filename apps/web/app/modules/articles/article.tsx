@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
-import { IArticle } from '../../interfaces'
+import { IArticle } from '@/interfaces'
 import ArticleDialog from './articleDialog'
 import { formatDate } from '@/lib/utils'
 
@@ -10,6 +10,7 @@ interface Props {
 }
 
 export default function Article({ article }: Props) {
+	console.log(article)
 	const dialogRef = useRef<HTMLDialogElement>(null)
 
 	return (
@@ -22,7 +23,7 @@ export default function Article({ article }: Props) {
 				{/* Обложка */}
 				<div className='aspect-[4/3] bg-gray-100 overflow-hidden'>
 					<img
-						src={article.imagePath}
+						src={article.image}
 						alt={article.title}
 						className='w-full h-full object-cover hover:scale-105 transition-transform duration-300'
 					/>
@@ -42,7 +43,7 @@ export default function Article({ article }: Props) {
 						</div>
 						<div className='text-sm text-gray-600'>
 							<span className='text-gray-400'>Редактор: </span>
-							{article.updatedBy.surname} {article.updatedBy.name.charAt(0)}.
+							{article.updateBy.surname} {article.updateBy.name.charAt(0)}.
 						</div>
 					</div>
 				</div>

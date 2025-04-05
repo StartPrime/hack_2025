@@ -14,10 +14,10 @@ export interface ILoginUser {
 
 export interface IArticle {
 	id: number
-	imagePath: string
+	image: string
 	title: string
 	createAt: string
-	updatedBy: {
+	updateBy: {
 		name: string
 		surname: string
 		middleName: string
@@ -31,4 +31,44 @@ export interface IDetailedArticle extends IArticle {
 		surname: string
 		middleName: string
 	}
+}
+
+export interface ITask {
+	id: number
+	title: string
+	createAt: string
+	assignedTo: {
+		name: string
+		surname: string
+		middleName: string
+	}
+	dueDate: string
+	priority: Priority
+	status: TaskStatus
+}
+
+export interface IDetailedTask extends ITask {
+	description: string
+	createdBy: {
+		name: string
+		surname: string
+		middleName: string
+	}
+	updatedBy: {
+		name: string
+		surname: string
+		middleName: string
+	}
+}
+
+export enum TaskStatus {
+	ACTIVE = 'ACTIVE',
+	POSTPONED = 'POSTPONED',
+	COMPLETED = 'COMPLETED',
+}
+
+export enum Priority {
+	LOW = 'LOW',
+	MEDIUM = 'MEDIUM',
+	HIGH = 'HIGH',
 }

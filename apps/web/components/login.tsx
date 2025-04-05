@@ -1,9 +1,12 @@
+'use client'
+
 import { Button } from '@workspace/ui/components/button'
 import { cn } from '@workspace/ui/lib/utils'
 import { useForm } from 'react-hook-form'
 import { ILoginUser } from '@/interfaces'
 import { useLogin } from '@/fetch/fetchAuth'
 import Loader from './loader'
+import { useRouter } from 'next/navigation'
 
 export default function Login() {
 	const {
@@ -15,9 +18,13 @@ export default function Login() {
 	})
 
 	const { loginUser, isLoading, isError, errorMessage } = useLogin()
+	const router = useRouter()
 
 	async function handleSubmitLogin(data: ILoginUser) {
-		await loginUser(data)
+		const res = await loginUser(data)
+		if (res) {
+			router.replace('/modules/articles')
+		}
 	}
 
 	if (isLoading) {

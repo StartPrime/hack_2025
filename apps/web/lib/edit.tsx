@@ -95,6 +95,7 @@ const Edit = ({ content = '', onChange }: Props) => {
 				{/* Кнопки форматирования текста */}
 				{['bold', 'italic', 'underline', 'strike'].map(format => (
 					<button
+						type='button'
 						key={format}
 						onClick={() => toggleFormat(format)}
 						className={`p-2 rounded hover:bg-gray-200 ${
@@ -298,6 +299,7 @@ const Edit = ({ content = '', onChange }: Props) => {
 						</button>
 					))}
 					<button
+						type='button'
 						onClick={() => toggleFormat('bulletList')}
 						className={`p-1 rounded hover:bg-gray-100 ${
 							isActive('bulletList') ? 'bg-gray-200' : ''
@@ -315,6 +317,7 @@ const Edit = ({ content = '', onChange }: Props) => {
 						</svg>
 					</button>
 					<button
+						type='button'
 						onClick={() => toggleFormat('orderedList')}
 						className={`p-1 rounded hover:bg-gray-100 ${
 							isActive('orderedList') ? 'bg-gray-200' : ''

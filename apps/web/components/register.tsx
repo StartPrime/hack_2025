@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { IRegisterUser } from '@/interfaces'
 import { useRegister, useLogin } from '@/fetch/fetchAuth'
 import Loader from './loader'
+import { useRouter } from 'next/navigation'
 
 interface IRegisterData extends IRegisterUser {
 	repeatPassword: string
@@ -25,12 +26,17 @@ export default function Register() {
 	const { registerUser, isLoading, isError, errorMessage } = useRegister()
 	const { loginUser } = useLogin()
 
+	const router = useRouter()
+
 	async function handleSubmitRegister(data: IRegisterData) {
 		const { repeatPassword, ...userData } = data
 		const resRegister = await registerUser(userData)
 		if (resRegister) {
 			const { login, password, ...otherData } = data
 			const resLogin = await loginUser({ login, password })
+			if (resLogin) {
+				router.replace('/modules/articles')
+			}
 		}
 	}
 
@@ -197,7 +203,7 @@ export default function Register() {
 						</label>
 					</div>
 					<Button type='submit' className='w-[100%] my-4' disabled={!isValid}>
-						Войти
+						Зарегистрироваться
 					</Button>
 					{isError && (
 						<p className='text-center text-red-600'>{errorMessage}</p>
