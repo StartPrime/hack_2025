@@ -5,6 +5,7 @@ import { useRef, useState } from 'react'
 import Task from './task'
 import { PlusIcon } from '@/lib/icons'
 import { ITask, Priority, TaskStatus } from '@/interfaces'
+import EditTaskDialog from './editTaskDialog'
 
 const testTasks: ITask[] = [
 	{
@@ -129,7 +130,7 @@ export default function TasksContainer() {
 						}`}
 					>
 						Отложенные задачи
-						<span className='ml-2 bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded-full'>
+						<span className='ml-2 bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded-full cursor-pointer'>
 							{postponedTasks.length}
 						</span>
 					</button>
@@ -150,38 +151,16 @@ export default function TasksContainer() {
 			{/* Сетка задач */}
 			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
 				{getTasksForActiveTab().map(task => (
-					<Task key={task.id} task={task} />
+					<Task key={task.id} task={task} currentStatus={TaskStatus.ACTIVE} />
 				))}
 			</div>
 
 			{/* Диалог добавления */}
 			<dialog
 				ref={dialogRef}
-				className='p-0 w-full max-w-2xl rounded-xl backdrop:bg-black/50'
+				className='p-0 w-full max-w-2xl rounded-xl backdrop:bg-black/50 m-auto'
 			>
-				<div className='bg-white rounded-xl shadow-xl overflow-hidden'>
-					<div className='p-6'>
-						<h2 className='text-xl font-bold mb-4'>Новая задача</h2>
-						<p>Форма добавления новой задачи</p>
-						<div className='flex justify-end gap-2 mt-6'>
-							<button
-								onClick={() => dialogRef.current?.close()}
-								className='px-4 py-2 text-gray-700 hover:bg-gray-100 rounded'
-							>
-								Отмена
-							</button>
-							<button
-								onClick={() => {
-									console.log('Добавление новой задачи')
-									dialogRef.current?.close()
-								}}
-								className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
-							>
-								Добавить
-							</button>
-						</div>
-					</div>
-				</div>
+				<EditTaskDialog dialogRef={dialogRef} />
 			</dialog>
 		</div>
 	)

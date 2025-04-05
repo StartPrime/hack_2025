@@ -88,7 +88,6 @@ export default function AddArticleDialog({
 					})
 				}
 			}
-			setReload()
 		} catch (e) {
 			console.error('Error submitting article:', e)
 		} finally {

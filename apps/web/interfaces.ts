@@ -74,7 +74,7 @@ export enum Priority {
 }
 
 export interface IArticleLogs {
-	id: number
+	id: string
 	title: string
 	eventType: string
 	changedBy: {
@@ -83,4 +83,6 @@ export interface IArticleLogs {
 		middleName: string
 	}
 	changedAt: string
+	isDeleted: boolean
+	articleId: string
 }

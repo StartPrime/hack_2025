@@ -45,3 +45,43 @@ export const PlusIcon = ({ className }: { className?: string }) => (
 		/>
 	</svg>
 )
+
+// src/lib/icons/clock.tsx
+export function ClockIcon({ className }: { className?: string }) {
+	return (
+		<svg
+			xmlns='http://www.w3.org/2000/svg'
+			fill='none'
+			viewBox='0 0 24 24'
+			stroke='currentColor'
+			className={className}
+		>
+			<path
+				strokeLinecap='round'
+				strokeLinejoin='round'
+				strokeWidth={2}
+				d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
+			/>
+		</svg>
+	)
+}
+
+// src/lib/icons/list-bullet.tsx
+export function ListBulletIcon({ className }: { className?: string }) {
+	return (
+		<svg
+			xmlns='http://www.w3.org/2000/svg'
+			fill='none'
+			viewBox='0 0 24 24'
+			stroke='currentColor'
+			className={className}
+		>
+			<path
+				strokeLinecap='round'
+				strokeLinejoin='round'
+				strokeWidth={2}
+				d='M4 6h16M4 12h16M4 18h16'
+			/>
+		</svg>
+	)
+}

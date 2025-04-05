@@ -16,7 +16,7 @@ const testArticle: IDetailedArticle = {
 	id: 5,
 	image: '/i.webp',
 	title: 'Лучшие практики работы с Git',
-	createAt: '04.04.2025',
+	createdAt: '04.04.2025',
 	content: `
     <p>В этой статье рассмотрим основные лучшие практики работы с системой контроля версий Git.</p>
     <h2>Основные команды</h2>
@@ -210,7 +210,7 @@ export default function ArticleDialog({
 											d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
 										/>
 									</svg>
-									<span>Создано: {currentArticle.createAt}</span>
+									<span>Создано: {currentArticle.createdAt}</span>
 								</div>
 								<div className='flex items-center gap-2'>
 									<svg
