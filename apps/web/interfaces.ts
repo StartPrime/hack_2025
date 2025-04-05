@@ -16,7 +16,7 @@ export interface IArticle {
 	id: number
 	image: string
 	title: string
-	createAt: string
+	createdAt: string
 	updatedBy: {
 		name: string
 		surname: string
@@ -71,4 +71,16 @@ export enum Priority {
 	LOW = 'LOW',
 	MEDIUM = 'MEDIUM',
 	HIGH = 'HIGH',
+}
+
+export interface IArticleLogs {
+	id: number
+	title: string
+	eventType: string
+	changedBy: {
+		name: string
+		surname: string
+		middleName: string
+	}
+	changedAt: string
 }

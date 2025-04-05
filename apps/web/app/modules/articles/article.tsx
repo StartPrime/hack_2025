@@ -7,11 +7,11 @@ import { formatDate } from '@/lib/utils'
 
 interface Props {
 	article: IArticle
+	setReload: () => void
 }
 
-export default function Article({ article }: Props) {
+export default function Article({ article, setReload }: Props) {
 	const dialogRef = useRef<HTMLDialogElement>(null)
-
 	return (
 		<div className='relative h-full flex flex-col'>
 			{/* Карточка статьи */}
@@ -38,7 +38,7 @@ export default function Article({ article }: Props) {
 					{/* Мета-информация */}
 					<div className='mt-auto pt-3 border-t-1 border-gray-200'>
 						<div className='text-sm text-gray-500 mb-1'>
-							{formatDate(article.createAt)}
+							{formatDate(article.createdAt)}
 						</div>
 						<div className='text-sm text-gray-600'>
 							<span className='text-gray-400'>Редактор: </span>
@@ -48,7 +48,11 @@ export default function Article({ article }: Props) {
 				</div>
 			</div>
 
-			<ArticleDialog dialogRef={dialogRef} articleId={article.id} />
+			<ArticleDialog
+				dialogRef={dialogRef}
+				articleId={article.id}
+				setReload={setReload}
+			/>
 		</div>
 	)
 }

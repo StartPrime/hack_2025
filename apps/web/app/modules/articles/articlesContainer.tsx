@@ -13,6 +13,12 @@ export default function ArticleContainer() {
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
+	const [isReload, setIsReload] = useState(false)
+
+	const setReload = () => {
+		setIsReload(!isReload)
+	}
+
 	useEffect(() => {
 		async function fetchArticles() {
 			try {
@@ -33,7 +39,7 @@ export default function ArticleContainer() {
 		}
 
 		fetchArticles()
-	}, [])
+	}, [isReload])
 
 	if (loading) {
 		return (
@@ -72,12 +78,12 @@ export default function ArticleContainer() {
 			{/* Сетка статей */}
 			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
 				{articles.map(article => (
-					<Article key={article.id} article={article} />
+					<Article key={article.id} article={article} setReload={setReload} />
 				))}
 			</div>
 
 			<dialog ref={dialogRef}>
-				<AddArticleDialog dialogRef={dialogRef} />
+				<AddArticleDialog dialogRef={dialogRef} setReload={setReload} />
 			</dialog>
 		</div>
 	)

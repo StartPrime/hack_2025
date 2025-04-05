@@ -18,10 +18,9 @@ interface ITaskForm {
 interface Props {
 	dialogRef: RefObject<HTMLDialogElement | null>
 	task?: IDetailedTask
-	teamMembers: Array<{ id: string; name: string; surname: string }>
 }
 
-export default function TaskDialog({ dialogRef, task, teamMembers }: Props) {
+export default function TaskDialog({ dialogRef, task }: Props) {
 	const isEditMode = !!task
 
 	const {
@@ -39,7 +38,6 @@ export default function TaskDialog({ dialogRef, task, teamMembers }: Props) {
 			dueDate: task?.dueDate || '',
 			priority: task?.priority || Priority.MEDIUM,
 			status: task?.status || TaskStatus.ACTIVE,
-			assignedTo: task?.assignedTo.id || '',
 		},
 	})
 
@@ -106,13 +104,7 @@ export default function TaskDialog({ dialogRef, task, teamMembers }: Props) {
 							<select
 								className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all'
 								{...register('assignedTo', { required: true })}
-							>
-								{teamMembers.map(member => (
-									<option key={member.id} value={member.id}>
-										{member.surname} {member.name}
-									</option>
-								))}
-							</select>
+							></select>
 						</div>
 
 						{/* Поле даты */}

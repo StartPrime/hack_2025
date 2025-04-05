@@ -16,9 +16,14 @@ interface IArticleForm {
 interface Props {
 	dialogRef: RefObject<HTMLDialogElement | null>
 	article?: IDetailedArticle
+	setReload: () => void
 }
 
-export default function AddArticleDialog({ dialogRef, article }: Props) {
+export default function AddArticleDialog({
+	dialogRef,
+	article,
+	setReload,
+}: Props) {
 	const isEditMode = !!article
 
 	const {
@@ -67,7 +72,23 @@ export default function AddArticleDialog({ dialogRef, article }: Props) {
 						body: formData,
 					})
 				}
+			} else {
+				const resOne = await apiClient(`/articles/${article.id}`, {
+					method: 'PUT',
+					body: JSON.stringify({ title: data.title, content: data.content }),
+				})
+				console.log(resOne, data.image?.[0])
+				if (data.image?.[0]) {
+					const formData = new FormData()
+					formData.append('image', data.image[0])
+
+					await apiClient(`/articles/${article.id}/upload_image`, {
+						method: 'POST',
+						body: formData,
+					})
+				}
 			}
+			setReload()
 		} catch (e) {
 			console.error('Error submitting article:', e)
 		} finally {

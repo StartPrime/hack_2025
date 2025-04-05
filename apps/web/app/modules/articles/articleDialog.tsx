@@ -9,6 +9,7 @@ import { apiClient } from '@/fetch/apiClient'
 interface Props {
 	dialogRef: RefObject<HTMLDialogElement | null>
 	articleId: number
+	setReload: () => void
 }
 
 const testArticle: IDetailedArticle = {
@@ -39,15 +40,18 @@ const testArticle: IDetailedArticle = {
 	},
 }
 
-export default function ArticleDialog({ dialogRef, articleId }: Props) {
+export default function ArticleDialog({
+	dialogRef,
+	articleId,
+	setReload,
+}: Props) {
 	const [isEdit, setIsEdit] = useState(false)
 	const [article, setArticle] = useState<IDetailedArticle | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
-	console.log(article)
+
 	const fetchArticle = async () => {
 		try {
-			console.log(1)
 			setIsLoading(true)
 			setError(null)
 			const data = await apiClient<IDetailedArticle>(`/articles/${articleId}`, {
@@ -70,10 +74,9 @@ export default function ArticleDialog({ dialogRef, articleId }: Props) {
 				method: 'DELETE',
 			})
 			dialogRef.current?.close()
-			// Здесь можно добавить уведомление об успешном удалении
+			setReload()
 		} catch (err) {
-			console.error('Ошибка при удалении статьи:', err)
-			// Здесь можно добавить уведомление об ошибке
+			console.error('Ошибка при удал	ении статьи:', err)
 		}
 	}
 
@@ -280,7 +283,11 @@ export default function ArticleDialog({ dialogRef, articleId }: Props) {
 					</div>
 				</div>
 			) : (
-				<AddArticleDialog dialogRef={dialogRef} article={currentArticle} />
+				<AddArticleDialog
+					dialogRef={dialogRef}
+					article={currentArticle}
+					setReload={setReload}
+				/>
 			)}
 		</dialog>
 	)
