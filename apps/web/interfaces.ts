@@ -86,3 +86,25 @@ export interface IArticleLogs {
 	isDeleted: boolean
 	articleId: string
 }
+
+export interface IUser {
+	login: string
+	firstName: string
+	middleName: string
+	surname: string
+	role: string
+	registrationDate: string
+}
+
+export interface ITaskLogs {
+	taskName: string
+	eventType: string
+	changedBy: {
+		name: string
+		middleName: string
+		surname: string
+	}
+	changedAt: string
+	oldStatus: string
+	newStatus: string
+}

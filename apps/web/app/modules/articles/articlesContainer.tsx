@@ -72,7 +72,7 @@ export default function ArticleContainer() {
 					{/* Новая кнопка для логов */}
 					<button
 						onClick={() => setShowLogs(!showLogs)}
-						className='px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2'
+						className='px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 cursor-pointer'
 					>
 						<svg
 							className='w-5 h-5'
@@ -87,12 +87,12 @@ export default function ArticleContainer() {
 								d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
 							/>
 						</svg>
-						<span>{showLogs ? 'Скрыть логи' : 'Показать логи'}</span>
+						<span>{showLogs ? 'Скрыть' : 'Показать изменения'}</span>
 					</button>
 
 					<button
 						onClick={() => dialogRef.current?.showModal()}
-						className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2'
+						className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 cursor-pointer'
 					>
 						<PlusIcon className='w-5 h-5' />
 						<span>Добавить статью</span>

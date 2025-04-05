@@ -1,4 +1,3 @@
-// createTaskDialog.tsx
 'use client'
 
 import { RefObject, useEffect, useState } from 'react'
@@ -52,7 +51,6 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 		},
 	})
 
-	// Загрузка списка пользователей
 	useEffect(() => {
 		const fetchUsers = async () => {
 			setIsUsersLoading(true)
@@ -77,7 +75,7 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 				assignedTo: data.assignedTo?.id || '',
 				priority: data.priority,
 				status: data.status,
-				dueDate: `${data.dueDate}T00:00:00Z`, // Форматируем дату для сервера
+				dueDate: `${data.dueDate}T00:00:00Z`,
 			}
 
 			await apiClient('/tasks/', {
@@ -118,7 +116,6 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 
 	return (
 		<div className='flex flex-col h-full'>
-			{/* Шапка диалога */}
 			<div className='sticky top-0 z-10 bg-white p-4 border-b flex justify-between items-center'>
 				<h2 className='text-xl font-bold text-gray-800'>
 					Создание новой задачи
@@ -132,13 +129,11 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 				</button>
 			</div>
 
-			{/* Форма создания */}
 			<form
 				onSubmit={handleSubmit(onSubmit)}
 				className='flex flex-col flex-grow p-6 overflow-y-auto'
 			>
 				<div className='space-y-6 flex-grow'>
-					{/* Название задачи */}
 					<div>
 						<label className='block text-sm font-medium text-gray-700 mb-1'>
 							Название задачи *
@@ -153,7 +148,6 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 						)}
 					</div>
 
-					{/* Ответственный */}
 					<div className='relative'>
 						<label className='block text-sm font-medium text-gray-700 mb-1'>
 							Ответственный *
@@ -215,7 +209,6 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 						)}
 					</div>
 
-					{/* Дата дедлайна и приоритет */}
 					<div className='grid grid-cols-2 gap-4'>
 						<div>
 							<label className='block text-sm font-medium text-gray-700 mb-1'>
@@ -251,7 +244,6 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 						</div>
 					</div>
 
-					{/* Статус */}
 					<div>
 						<label className='block text-sm font-medium text-gray-700 mb-1'>
 							Статус *
@@ -270,7 +262,6 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 						</select>
 					</div>
 
-					{/* Описание */}
 					<div className='flex-grow'>
 						<label className='block text-sm font-medium text-gray-700 mb-1'>
 							Описание
@@ -282,7 +273,6 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 					</div>
 				</div>
 
-				{/* Кнопки */}
 				<div className='sticky bottom-0 bg-white pt-4 flex justify-end gap-2'>
 					<button
 						type='button'

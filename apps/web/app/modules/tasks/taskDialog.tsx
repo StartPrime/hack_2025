@@ -6,6 +6,13 @@ import { useForm } from 'react-hook-form'
 import Edit from '@/lib/edit'
 import { apiClient } from '@/fetch/apiClient'
 
+interface User {
+	id: string
+	firstName: string
+	surname: string
+	middleName: string
+}
+
 interface Props {
 	dialogRef: RefObject<HTMLDialogElement | null>
 	taskId?: number | null
@@ -17,11 +24,15 @@ export default function TaskDialog({
 	taskId,
 	onTaskUpdated,
 }: Props) {
-	const [isEdit, setIsEdit] = useState(false)
+	const [isEditMode, setIsEditMode] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
-	const [currentTask, setCurrentTask] = useState<
+	const [taskDetails, setTaskDetails] = useState<
 		(ITask & IDetailedTask) | null
 	>(null)
+	const [users, setUsers] = useState<User[]>([])
+	const [isUsersLoading, setIsUsersLoading] = useState(false)
+	const [showUserDropdown, setShowUserDropdown] = useState(false)
+	const [searchTerm, setSearchTerm] = useState('')
 
 	const {
 		register,
@@ -34,28 +45,52 @@ export default function TaskDialog({
 		defaultValues: {
 			title: '',
 			description: '',
-			assignedTo: {
-				name: '',
-				surname: '',
-				middleName: '',
-			},
+			assignedTo: null as User | null,
 			dueDate: '',
 			priority: Priority.MEDIUM,
 			status: TaskStatus.ACTIVE,
 		},
 	})
 
-	const fetchTask = async () => {
+	// Загрузка списка пользователей
+	useEffect(() => {
+		const fetchUsers = async () => {
+			setIsUsersLoading(true)
+			try {
+				const users: User[] = await apiClient('/users/', { method: 'GET' })
+				setUsers(users)
+			} catch (error) {
+				console.error('Ошибка при загрузке пользователей:', error)
+			} finally {
+				setIsUsersLoading(false)
+			}
+		}
+
+		fetchUsers()
+	}, [])
+
+	const fetchTaskDetails = async () => {
+		if (!taskId) return
+
 		setIsLoading(true)
 		try {
 			const data: ITask & IDetailedTask = await apiClient(`/tasks/${taskId}`, {
 				method: 'GET',
 			})
-			setCurrentTask(data)
+			setTaskDetails(data)
+
+			// Находим пользователя в списке по ФИО
+			const assignedUser = users.find(
+				u =>
+					u.surname === data.assignedTo.surname &&
+					u.firstName === data.assignedTo.name &&
+					u.middleName === data.assignedTo.middleName
+			)
+
 			reset({
 				title: data.title,
 				description: data.description,
-				assignedTo: data.assignedTo,
+				assignedTo: assignedUser || null,
 				dueDate: data.dueDate.split('T')[0],
 				priority: data.priority,
 				status: data.status,
@@ -68,49 +103,36 @@ export default function TaskDialog({
 	}
 
 	useEffect(() => {
-		const dialog = dialogRef.current
-		if (!dialog) return
-
-		const observer = new MutationObserver(mutations => {
-			mutations.forEach(mutation => {
-				if (mutation.attributeName === 'open') {
-					if (dialog.open && taskId) {
-						fetchTask()
-					} else {
-						setIsEdit(false)
-						setCurrentTask(null)
-						reset()
-					}
-				}
-			})
-		})
-
-		observer.observe(dialog, { attributes: true })
-		return () => observer.disconnect()
-	}, [taskId])
+		if (dialogRef.current?.open && taskId) {
+			fetchTaskDetails()
+		} else {
+			setIsEditMode(false)
+			setTaskDetails(null)
+			reset()
+		}
+	}, [taskId, dialogRef.current?.open, users])
 
 	const onSubmit = async (data: any) => {
 		try {
-			if (currentTask) {
+			if (taskDetails && data.assignedTo) {
+				const taskData = {
+					id: taskDetails.id,
+					title: data.title,
+					description: data.description,
+					assignedTo: data.assignedTo.id, // Отправляем ID пользователя
+					priority: data.priority,
+					status: data.status,
+					dueDate: `${data.dueDate}T00:00:00Z`,
+				}
+
 				await apiClient(`/tasks/update`, {
-					method: 'POST',
-					body: JSON.stringify({
-						...data,
-						dueDate: `${data.dueDate}T00:00:00Z`,
-					}),
-				})
-			} else {
-				await apiClient('/tasks/', {
-					method: 'POST',
-					body: JSON.stringify({
-						...data,
-						dueDate: `${data.dueDate}T00:00:00Z`,
-					}),
+					method: 'PUT',
+					body: JSON.stringify(taskData),
 				})
 			}
 
 			dialogRef.current?.close()
-			onTaskUpdated && (await onTaskUpdated())
+			onTaskUpdated?.()
 		} catch (error) {
 			console.error('Ошибка при сохранении задачи:', error)
 		}
@@ -126,13 +148,29 @@ export default function TaskDialog({
 
 	const handleDelete = async () => {
 		try {
-			await apiClient(`/tasks/${currentTask?.id}`, { method: 'DELETE' })
-			dialogRef.current?.close()
-			onTaskUpdated && (await onTaskUpdated())
+			if (taskDetails) {
+				await apiClient(`/tasks/${taskDetails.id}`, { method: 'DELETE' })
+				dialogRef.current?.close()
+				onTaskUpdated?.()
+			}
 		} catch (error) {
 			console.error('Ошибка при удалении задачи:', error)
 		}
 	}
+
+	const handleUserSelect = (user: User) => {
+		setValue('assignedTo', user)
+		setShowUserDropdown(false)
+		setSearchTerm('')
+	}
+
+	const filteredUsers = users.filter(user => {
+		const fullName =
+			`${user.surname} ${user.firstName} ${user.middleName}`.toLowerCase()
+		return fullName.includes(searchTerm.toLowerCase())
+	})
+
+	const assignedTo = watch('assignedTo')
 
 	if (isLoading) {
 		return (
@@ -147,11 +185,7 @@ export default function TaskDialog({
 		<div className='flex flex-col h-full'>
 			<div className='sticky top-0 z-10 bg-white p-4 border-b flex justify-between items-center'>
 				<h2 className='text-xl font-bold text-gray-800'>
-					{isEdit
-						? currentTask
-							? 'Редактирование задачи'
-							: 'Создание новой задачи'
-						: 'Просмотр задачи'}
+					{isEditMode ? 'Редактирование задачи' : 'Просмотр задачи'}
 				</h2>
 				<button
 					onClick={handleClose}
@@ -169,9 +203,9 @@ export default function TaskDialog({
 				<div className='space-y-6 flex-grow'>
 					<div>
 						<label className='block text-sm font-medium text-gray-700 mb-1'>
-							Название задачи {isEdit && '*'}
+							Название задачи {isEditMode && '*'}
 						</label>
-						{isEdit ? (
+						{isEditMode ? (
 							<input
 								{...register('title', { required: true })}
 								className='w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
@@ -179,7 +213,7 @@ export default function TaskDialog({
 							/>
 						) : (
 							<div className='w-full px-4 py-2 border rounded bg-gray-50'>
-								{currentTask?.title || 'Нет названия'}
+								{taskDetails?.title || 'Нет названия'}
 							</div>
 						)}
 						{errors.title && (
@@ -187,61 +221,106 @@ export default function TaskDialog({
 						)}
 					</div>
 
-					<div>
+					<div className='relative'>
 						<label className='block text-sm font-medium text-gray-700 mb-1'>
-							Ответственный
+							Ответственный {isEditMode && '*'}
 						</label>
-						{isEdit ? (
-							<div className='grid grid-cols-3 gap-4'>
-								<input
-									{...register('assignedTo.name')}
-									className='w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-									placeholder='Имя'
-								/>
-								<input
-									{...register('assignedTo.surname')}
-									className='w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-									placeholder='Фамилия'
-								/>
-								<input
-									{...register('assignedTo.middleName')}
-									className='w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-									placeholder='Отчество'
-								/>
+						{isEditMode ? (
+							<div className='relative'>
+								{assignedTo ? (
+									<div
+										className='w-full px-4 py-2 border rounded bg-gray-50 cursor-pointer'
+										onClick={() => setShowUserDropdown(!showUserDropdown)}
+									>
+										{`${assignedTo.surname} ${assignedTo.firstName} ${assignedTo.middleName}`}
+									</div>
+								) : (
+									<div className='relative'>
+										<input
+											type='text'
+											value={searchTerm}
+											onChange={e => setSearchTerm(e.target.value)}
+											onFocus={() => setShowUserDropdown(true)}
+											className='w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+											placeholder='Начните вводить ФИО'
+										/>
+										{isUsersLoading && (
+											<div className='absolute right-3 top-3'>
+												<div className='animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400'></div>
+											</div>
+										)}
+									</div>
+								)}
+
+								{showUserDropdown && (
+									<div className='absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'>
+										{filteredUsers.length > 0 ? (
+											filteredUsers.map(user => (
+												<div
+													key={user.id}
+													className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
+													onClick={() => handleUserSelect(user)}
+												>
+													{`${user.surname} ${user.firstName} ${user.middleName}`}
+												</div>
+											))
+										) : (
+											<div className='px-4 py-2 text-gray-500'>
+												{isUsersLoading
+													? 'Загрузка...'
+													: 'Пользователи не найдены'}
+											</div>
+										)}
+									</div>
+								)}
 							</div>
 						) : (
 							<div className='w-full px-4 py-2 border rounded bg-gray-50'>
-								{currentTask
-									? `${currentTask.assignedTo.surname} ${currentTask.assignedTo.name} ${currentTask.assignedTo.middleName}`
+								{taskDetails
+									? `${taskDetails.assignedTo.surname} ${taskDetails.assignedTo.name} ${taskDetails.assignedTo.middleName}`
 									: 'Не назначен'}
 							</div>
+						)}
+						{isEditMode && (
+							<input
+								type='hidden'
+								{...register('assignedTo', { required: true })}
+							/>
+						)}
+						{errors.assignedTo && (
+							<p className='text-red-500 text-sm mt-1'>Это поле обязательно</p>
 						)}
 					</div>
 
 					<div className='grid grid-cols-2 gap-4'>
 						<div>
 							<label className='block text-sm font-medium text-gray-700 mb-1'>
-								Дата дедлайна
+								Дата дедлайна {isEditMode && '*'}
 							</label>
-							{isEdit ? (
+							{isEditMode ? (
 								<input
 									type='date'
-									{...register('dueDate')}
+									{...register('dueDate', { required: true })}
 									className='w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
 								/>
 							) : (
 								<div className='w-full px-4 py-2 border rounded bg-gray-50'>
-									{currentTask?.dueDate || 'Не установлена'}
+									{taskDetails?.dueDate.split('T')[0] || 'Не установлена'}
 								</div>
+							)}
+							{errors.dueDate && (
+								<p className='text-red-500 text-sm mt-1'>
+									Это поле обязательно
+								</p>
 							)}
 						</div>
 						<div>
 							<label className='block text-sm font-medium text-gray-700 mb-1'>
-								Приоритет
+								Приоритет {isEditMode && '*'}
 							</label>
-							{isEdit ? (
+							{isEditMode ? (
 								<select
-									{...register('priority')}
+									{...register('priority', { required: true })}
 									className='w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
 								>
 									{Object.values(Priority).map(priority => (
@@ -254,9 +333,9 @@ export default function TaskDialog({
 								</select>
 							) : (
 								<div className='w-full px-4 py-2 border rounded bg-gray-50'>
-									{currentTask?.priority === Priority.LOW && 'Низкий'}
-									{currentTask?.priority === Priority.MEDIUM && 'Средний'}
-									{currentTask?.priority === Priority.HIGH && 'Высокий'}
+									{taskDetails?.priority === Priority.LOW && 'Низкий'}
+									{taskDetails?.priority === Priority.MEDIUM && 'Средний'}
+									{taskDetails?.priority === Priority.HIGH && 'Высокий'}
 								</div>
 							)}
 						</div>
@@ -264,11 +343,11 @@ export default function TaskDialog({
 
 					<div>
 						<label className='block text-sm font-medium text-gray-700 mb-1'>
-							Статус
+							Статус {isEditMode && '*'}
 						</label>
-						{isEdit ? (
+						{isEditMode ? (
 							<select
-								{...register('status')}
+								{...register('status', { required: true })}
 								className='w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
 							>
 								{Object.values(TaskStatus).map(status => (
@@ -281,9 +360,9 @@ export default function TaskDialog({
 							</select>
 						) : (
 							<div className='w-full px-4 py-2 border rounded bg-gray-50'>
-								{currentTask?.status === TaskStatus.ACTIVE && 'Активная'}
-								{currentTask?.status === TaskStatus.POSTPONED && 'Отложенная'}
-								{currentTask?.status === TaskStatus.COMPLETED && 'Завершенная'}
+								{taskDetails?.status === TaskStatus.ACTIVE && 'Активная'}
+								{taskDetails?.status === TaskStatus.POSTPONED && 'Отложенная'}
+								{taskDetails?.status === TaskStatus.COMPLETED && 'Завершенная'}
 							</div>
 						)}
 					</div>
@@ -292,7 +371,7 @@ export default function TaskDialog({
 						<label className='block text-sm font-medium text-gray-700 mb-1'>
 							Описание
 						</label>
-						{isEdit ? (
+						{isEditMode ? (
 							<Edit
 								content={watch('description')}
 								onChange={handleContentChange}
@@ -301,7 +380,7 @@ export default function TaskDialog({
 							<div
 								className='w-full px-4 py-2 border rounded bg-gray-50 min-h-[200px]'
 								dangerouslySetInnerHTML={{
-									__html: currentTask?.description || 'Нет описания',
+									__html: taskDetails?.description || 'Нет описания',
 								}}
 							/>
 						)}
@@ -309,7 +388,7 @@ export default function TaskDialog({
 				</div>
 
 				<div className='sticky bottom-0 bg-white pt-4 flex justify-end gap-2'>
-					{!isEdit && currentTask && (
+					{!isEditMode && taskDetails && (
 						<>
 							<button
 								type='button'
@@ -320,7 +399,7 @@ export default function TaskDialog({
 							</button>
 							<button
 								type='button'
-								onClick={() => setIsEdit(true)}
+								onClick={() => setIsEditMode(true)}
 								className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
 							>
 								Редактировать
@@ -328,11 +407,11 @@ export default function TaskDialog({
 						</>
 					)}
 
-					{isEdit && (
+					{isEditMode && (
 						<>
 							<button
 								type='button'
-								onClick={() => setIsEdit(false)}
+								onClick={() => setIsEditMode(false)}
 								className='px-4 py-2 text-gray-700 hover:bg-gray-100 rounded'
 							>
 								Отмена
@@ -342,11 +421,7 @@ export default function TaskDialog({
 								disabled={isSubmitting}
 								className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed'
 							>
-								{isSubmitting
-									? 'Сохранение...'
-									: currentTask
-										? 'Сохранить'
-										: 'Создать'}
+								{isSubmitting ? 'Сохранение...' : 'Сохранить'}
 							</button>
 						</>
 					)}

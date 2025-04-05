@@ -71,13 +71,13 @@ export default function AddArticleDialog({
 						method: 'POST',
 						body: formData,
 					})
+					setReload()
 				}
 			} else {
 				const resOne = await apiClient(`/articles/${article.id}`, {
 					method: 'PUT',
 					body: JSON.stringify({ title: data.title, content: data.content }),
 				})
-				console.log(resOne, data.image?.[0])
 				if (data.image?.[0]) {
 					const formData = new FormData()
 					formData.append('image', data.image[0])
@@ -87,6 +87,7 @@ export default function AddArticleDialog({
 						body: formData,
 					})
 				}
+				setReload()
 			}
 		} catch (e) {
 			console.error('Error submitting article:', e)
