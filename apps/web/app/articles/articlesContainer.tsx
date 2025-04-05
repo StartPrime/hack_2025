@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import { IArticle } from '../../interfaces'
 import Article from './article'
 import AddArticleDialog from './addArticleDialog'
+import { PlusIcon } from '../../lib/icons'
 
 interface Props {
 	articles: IArticle[]
@@ -33,23 +34,9 @@ export default function ArticleContainer({ articles }: Props) {
 				))}
 			</div>
 
-			<AddArticleDialog dialogRef={dialogRef} />
+			<dialog ref={dialogRef}>
+				<AddArticleDialog dialogRef={dialogRef} />
+			</dialog>
 		</div>
 	)
 }
-
-const PlusIcon = ({ className }: { className?: string }) => (
-	<svg
-		className={className}
-		fill='none'
-		viewBox='0 0 24 24'
-		stroke='currentColor'
-	>
-		<path
-			strokeLinecap='round'
-			strokeLinejoin='round'
-			strokeWidth={2}
-			d='M12 6v6m0 0v6m0-6h6m-6 0H6'
-		/>
-	</svg>
-)

@@ -57,6 +57,10 @@ export default function Register() {
 								placeholder='Имя'
 								{...register('firstName', {
 									required: 'Поле обязательно для заполнения',
+									pattern: {
+										value: /^[А-Яа-яЁё\s]+$/,
+										message: 'Допустимы только русские буквы',
+									},
 								})}
 								className={cn(
 									'p-2 border-b-1 border-primary w-[100%] outline-none',
@@ -75,6 +79,10 @@ export default function Register() {
 								placeholder='Фамилия'
 								{...register('surname', {
 									required: 'Поле обязательно для заполнения',
+									pattern: {
+										value: /^[А-Яа-яЁё\s]+$/,
+										message: 'Допустимы только русские буквы',
+									},
 								})}
 								className={cn(
 									'p-2 border-b-1 border-primary w-[100%] outline-none',
@@ -93,6 +101,10 @@ export default function Register() {
 								placeholder='Отчество'
 								{...register('middleName', {
 									required: 'Поле обязательно для заполнения',
+									pattern: {
+										value: /^[А-Яа-яЁё\s]+$/,
+										message: 'Допустимы только русские буквы',
+									},
 								})}
 								className={cn(
 									'p-2 border-b-1 border-primary w-[100%] outline-none',
@@ -107,10 +119,18 @@ export default function Register() {
 						</label>
 						<label className='h-[45px]'>
 							<input
-								type='phone'
+								type='text'
 								placeholder='Логин'
 								{...register('login', {
 									required: 'Поле обязательно для заполнения',
+									pattern: {
+										value: /^[a-zA-Z]+$/,
+										message: 'Допустимы только латинские буквы',
+									},
+									minLength: {
+										value: 3,
+										message: 'Минимальная длина 3 символа',
+									},
 								})}
 								className={cn(
 									'p-2 border-b-1 border-primary w-[100%] outline-none',
@@ -133,6 +153,11 @@ export default function Register() {
 										value: 8,
 										message: 'Минимальная длина 8 символов',
 									},
+									pattern: {
+										value: /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/,
+										message:
+											'Допустимы только латинские буквы, цифры и специальные символы',
+									},
 								})}
 								className={cn(
 									'p-2 border-b-1 border-primary w-[100%] outline-none',
@@ -140,12 +165,17 @@ export default function Register() {
 								)}
 							/>
 							{errors?.password && (
-								<p className='text-xs text-red-600 mt-1'>
+								<p className='text-xs text-red-600 mt-1	'>
 									{errors.password.message}
 								</p>
 							)}
 						</label>
-						<label className='h-[45px]'>
+						<label
+							className={cn(
+								'h-[45px]',
+								errors.password?.type === 'pattern' && 'mt-4'
+							)}
+						>
 							<input
 								type='password'
 								placeholder='Повторите пароль'

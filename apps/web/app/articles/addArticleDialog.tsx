@@ -3,6 +3,8 @@
 import { RefObject, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Edit from './edit'
+import { CloseIcon, UploadIcon } from '../../lib/icons'
+import { IDetailedArticle } from '@/interfaces'
 
 interface IArticleForm {
 	title: string
@@ -12,9 +14,12 @@ interface IArticleForm {
 
 interface Props {
 	dialogRef: RefObject<HTMLDialogElement | null>
+	article?: IDetailedArticle
 }
 
-export default function AddArticleDialog({ dialogRef }: Props) {
+export default function AddArticleDialog({ dialogRef, article }: Props) {
+	const isEditMode = !!article
+
 	const {
 		register,
 		handleSubmit,
@@ -25,27 +30,40 @@ export default function AddArticleDialog({ dialogRef }: Props) {
 	} = useForm<IArticleForm>({
 		mode: 'onBlur',
 		defaultValues: {
-			title: '',
-			content: '',
+			title: article?.title || '',
+			content: article?.content || '',
 		},
 	})
 
-	const [fileInputLabel, setFileInputLabel] = useState('Выберите файл')
+	const [fileInputLabel, setFileInputLabel] = useState(
+		isEditMode ? article.imagePath : 'Выберите файл'
+	)
 	const imagePreview = watch('image')?.[0]
-	const previewUrl = imagePreview ? URL.createObjectURL(imagePreview) : null
+	const previewUrl = imagePreview
+		? URL.createObjectURL(imagePreview)
+		: isEditMode
+			? article.imagePath
+			: null
 
 	const onSubmit = (data: IArticleForm) => {
 		console.log('Данные формы:', {
 			title: data.title,
 			content: data.content,
-			image: data.image?.[0]?.name || 'Не выбрано',
+			image:
+				data.image?.[0]?.name ||
+				(isEditMode ? article.imagePath : 'Не выбрано'),
 		})
-		reset()
+
+		if (!isEditMode) {
+			reset()
+		}
 		dialogRef.current?.close()
 	}
 
 	const handleClose = () => {
-		reset()
+		if (!isEditMode) {
+			reset()
+		}
 		dialogRef.current?.close()
 	}
 
@@ -53,7 +71,7 @@ export default function AddArticleDialog({ dialogRef }: Props) {
 		if (e.target.files?.[0]) {
 			setFileInputLabel(e.target.files[0].name)
 		} else {
-			setFileInputLabel('Выберите файл')
+			setFileInputLabel(isEditMode ? article.imagePath : 'Выберите файл')
 		}
 	}
 
@@ -62,14 +80,13 @@ export default function AddArticleDialog({ dialogRef }: Props) {
 	}
 
 	return (
-		<dialog
-			ref={dialogRef}
-			className='fixed inset-0 m-auto p-0 rounded-xl shadow-2xl backdrop:bg-black/50 w-full max-w-3xl bg-white animate-fade-in overflow-auto'
-		>
+		<div className='fixed inset-0 m-auto p-0 rounded-xl shadow-2xl backdrop:bg-black/50 w-full max-w-3xl max-h-[95vh] bg-white animate-fade-in overflow-auto'>
 			<div className='relative'>
 				{/* Заголовок и кнопка закрытия */}
 				<div className='sticky top-0 z-10 bg-white p-6 pb-4 border-b flex justify-between items-start'>
-					<h2 className='text-2xl font-bold text-gray-800'>Новая статья</h2>
+					<h2 className='text-2xl font-bold text-gray-800'>
+						{isEditMode ? 'Редактирование статьи' : 'Новая статья'}
+					</h2>
 					<button
 						onClick={handleClose}
 						className='text-gray-400 hover:text-gray-600 transition-colors cursor-pointer'
@@ -113,7 +130,7 @@ export default function AddArticleDialog({ dialogRef }: Props) {
 							</label>
 							<div className='flex-1 space-y-2'>
 								<p className='text-sm text-gray-500'>
-									{imagePreview?.name || 'Файл не выбран'}
+									{imagePreview?.name || fileInputLabel}
 								</p>
 								<p className='text-xs text-gray-400'>
 									Рекомендуемый размер: 1200×630px
@@ -173,44 +190,11 @@ export default function AddArticleDialog({ dialogRef }: Props) {
 							}`}
 							disabled={!isValid}
 						>
-							Опубликовать
+							{isEditMode ? 'Сохранить' : 'Опубликовать'}
 						</button>
 					</div>
 				</form>
 			</div>
-		</dialog>
+		</div>
 	)
 }
-
-// Иконки
-const CloseIcon = ({ className }: { className?: string }) => (
-	<svg
-		className={className}
-		fill='none'
-		viewBox='0 0 24 24'
-		stroke='currentColor'
-	>
-		<path
-			strokeLinecap='round'
-			strokeLinejoin='round'
-			strokeWidth={2}
-			d='M6 18L18 6M6 6l12 12'
-		/>
-	</svg>
-)
-
-const UploadIcon = ({ className }: { className?: string }) => (
-	<svg
-		className={className}
-		fill='none'
-		viewBox='0 0 24 24'
-		stroke='currentColor'
-	>
-		<path
-			strokeLinecap='round'
-			strokeLinejoin='round'
-			strokeWidth={2}
-			d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12'
-		/>
-	</svg>
-)
