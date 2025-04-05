@@ -17,7 +17,7 @@ export interface IArticle {
 	image: string
 	title: string
 	createAt: string
-	updateBy: {
+	updatedBy: {
 		name: string
 		surname: string
 		middleName: string

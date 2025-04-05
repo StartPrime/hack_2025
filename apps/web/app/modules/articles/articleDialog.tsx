@@ -4,6 +4,7 @@ import { RefObject, useEffect, useRef, useState } from 'react'
 import { IDetailedArticle } from '@/interfaces'
 import { Button } from '@workspace/ui/components/button'
 import AddArticleDialog from './addArticleDialog'
+import { apiClient } from '@/fetch/apiClient'
 
 interface Props {
 	dialogRef: RefObject<HTMLDialogElement | null>
@@ -26,7 +27,7 @@ const testArticle: IDetailedArticle = {
     <h2>Рекомендации</h2>
     <p>Всегда пишите осмысленные сообщения коммитов.</p>
   `,
-	updateBy: {
+	updatedBy: {
 		name: 'Сергей',
 		surname: 'Иванов',
 		middleName: 'Петрович',
@@ -40,23 +41,99 @@ const testArticle: IDetailedArticle = {
 
 export default function ArticleDialog({ dialogRef, articleId }: Props) {
 	const [isEdit, setIsEdit] = useState(false)
+	const [article, setArticle] = useState<IDetailedArticle | null>(null)
+	const [isLoading, setIsLoading] = useState(true)
+	const [error, setError] = useState<string | null>(null)
+	console.log(article)
+	const fetchArticle = async () => {
+		try {
+			console.log(1)
+			setIsLoading(true)
+			setError(null)
+			const data = await apiClient<IDetailedArticle>(`/articles/${articleId}`, {
+				method: 'GET',
+			})
+			setArticle(data)
+		} catch (err) {
+			console.error('Ошибка при загрузке статьи:', err)
+			setError('Не удалось загрузить статью')
+			// В случае ошибки используем тестовые данные
+			setArticle(testArticle)
+		} finally {
+			setIsLoading(false)
+		}
+	}
 
-	const handleDelete = () => {
-		console.log('Удаление статьи с ID:', articleId)
-		dialogRef.current?.close()
+	const handleDelete = async () => {
+		try {
+			await apiClient(`/articles/${articleId}`, {
+				method: 'DELETE',
+			})
+			dialogRef.current?.close()
+			// Здесь можно добавить уведомление об успешном удалении
+		} catch (err) {
+			console.error('Ошибка при удалении статьи:', err)
+			// Здесь можно добавить уведомление об ошибке
+		}
 	}
 
 	useEffect(() => {
 		const dialog = dialogRef.current
 
-		dialog?.addEventListener('close', () => {
-			setIsEdit(false)
+		if (!dialog) return
+
+		const observer = new MutationObserver(mutations => {
+			mutations.forEach(mutation => {
+				if (mutation.attributeName === 'open') {
+					if (dialog.open) {
+						fetchArticle()
+					} else {
+						setIsEdit(false)
+					}
+				}
+			})
 		})
 
+		observer.observe(dialog, { attributes: true })
+
 		return () => {
-			dialog?.removeEventListener('close', () => {})
+			observer.disconnect()
 		}
-	}, [])
+	}, [articleId])
+
+	if (isLoading && !article) {
+		return (
+			<dialog
+				ref={dialogRef}
+				className='fixed inset-0 m-auto p-0 w-full max-w-4xl max-h-[90vh] bg-white rounded-xl shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm overflow-auto animate-fade-in'
+			>
+				<div className='flex items-center justify-center h-full'>
+					<div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500'></div>
+				</div>
+			</dialog>
+		)
+	}
+
+	if (error && !article) {
+		return (
+			<dialog
+				ref={dialogRef}
+				className='fixed inset-0 m-auto p-0 w-full max-w-4xl max-h-[90vh] bg-white rounded-xl shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm overflow-auto animate-fade-in'
+			>
+				<div className='p-6 text-center'>
+					<p className='text-red-500'>{error}</p>
+					<button
+						onClick={() => dialogRef.current?.close()}
+						className='mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer'
+					>
+						Закрыть
+					</button>
+				</div>
+			</dialog>
+		)
+	}
+
+	const currentArticle = article || testArticle
 
 	return (
 		<dialog
@@ -94,8 +171,8 @@ export default function ArticleDialog({ dialogRef, articleId }: Props) {
 						{/* Обложка статьи */}
 						<div className='mb-6 rounded-lg overflow-hidden'>
 							<img
-								src={testArticle.image}
-								alt={testArticle.title}
+								src={currentArticle.image}
+								alt={currentArticle.title}
 								className='w-full h-auto max-h-96 object-cover'
 							/>
 						</div>
@@ -104,7 +181,7 @@ export default function ArticleDialog({ dialogRef, articleId }: Props) {
 						<div className='mb-8'>
 							<div className='flex justify-between'>
 								<h1 className='text-3xl font-bold text-gray-900 mb-4'>
-									{testArticle.title}
+									{currentArticle.title}
 								</h1>
 								<Button
 									onClick={() => {
@@ -130,7 +207,7 @@ export default function ArticleDialog({ dialogRef, articleId }: Props) {
 											d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
 										/>
 									</svg>
-									<span>Создано: {testArticle.createAt}</span>
+									<span>Создано: {currentArticle.createAt}</span>
 								</div>
 								<div className='flex items-center gap-2'>
 									<svg
@@ -147,8 +224,8 @@ export default function ArticleDialog({ dialogRef, articleId }: Props) {
 										/>
 									</svg>
 									<span>
-										Редактор: {testArticle.updateBy.surname}{' '}
-										{testArticle.updateBy.name.charAt(0)}.
+										Редактор: {currentArticle.updatedBy.surname}{' '}
+										{currentArticle.updatedBy.name.charAt(0)}.
 									</span>
 								</div>
 							</div>
@@ -157,7 +234,7 @@ export default function ArticleDialog({ dialogRef, articleId }: Props) {
 						{/* Контент статьи */}
 						<div
 							className='prose max-w-none'
-							dangerouslySetInnerHTML={{ __html: testArticle.content }}
+							dangerouslySetInnerHTML={{ __html: currentArticle.content }}
 						/>
 
 						{/* Автор статьи */}
@@ -166,8 +243,9 @@ export default function ArticleDialog({ dialogRef, articleId }: Props) {
 								Автор статьи
 							</h3>
 							<p className='text-gray-700'>
-								{testArticle.createdBy.surname} {testArticle.createdBy.name}{' '}
-								{testArticle.createdBy.middleName}
+								{currentArticle.createdBy.surname}{' '}
+								{currentArticle.createdBy.name}{' '}
+								{currentArticle.createdBy.middleName}
 							</p>
 						</div>
 					</div>
@@ -202,10 +280,7 @@ export default function ArticleDialog({ dialogRef, articleId }: Props) {
 					</div>
 				</div>
 			) : (
-				<AddArticleDialog
-					dialogRef={dialogRef}
-					article={testArticle}
-				></AddArticleDialog>
+				<AddArticleDialog dialogRef={dialogRef} article={currentArticle} />
 			)}
 		</dialog>
 	)

@@ -49,27 +49,31 @@ export default function AddArticleDialog({ dialogRef, article }: Props) {
 	const onSubmit = async (data: IArticleForm) => {
 		const pushData = { title: data.title, content: data.content }
 
-		if (!isEditMode) {
-			try {
-				const resOne = await apiClient('/articles/', {
+		try {
+			if (!isEditMode) {
+				// Создаем статью (JSON)
+				const resOne = await apiClient<{ id: string }>('/articles/', {
 					method: 'POST',
 					body: JSON.stringify(pushData),
 				})
 
+				// Загружаем изображение (FormData)
 				if (resOne && data.image?.[0]) {
 					const formData = new FormData()
-					formData.append('image', data.image?.[0])
-					const resSecond = await apiClient(
-						`/articles/${resOne}/upload_image/`,
-						{ method: 'POST', body: formData }
-					)
+					formData.append('image', data.image[0])
+
+					await apiClient(`/articles/${resOne.id}/upload_image`, {
+						method: 'POST',
+						body: formData,
+					})
 				}
-			} catch (e) {
-				console.log(e)
 			}
-			reset()
+		} catch (e) {
+			console.error('Error submitting article:', e)
+		} finally {
+			if (!isEditMode) reset()
+			dialogRef.current?.close()
 		}
-		dialogRef.current?.close()
 	}
 
 	const handleClose = () => {

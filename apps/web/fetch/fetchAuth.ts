@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { ILoginUser, IRegisterUser } from '@/interfaces'
 
+// const BASE_URL = 'http://test.feryafox.ru/api'
+
 export const useRegister = () => {
 	const [isLoading, setIsLoading] = useState(false)
 	const [isError, setIsError] = useState(false)
@@ -13,14 +15,11 @@ export const useRegister = () => {
 
 		try {
 			const userData = { ...data, role: 'BUYER' }
-			const response = await fetch(
-				'http://test.feryafox.ru/api/auth/register',
-				{
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json;charset=utf-8' },
-					body: JSON.stringify(userData),
-				}
-			)
+			const response = await fetch('http://127.0.0.1:8080/auth/register', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json;charset=utf-8' },
+				body: JSON.stringify(userData),
+			})
 
 			if (!response.ok) {
 				const message =
@@ -55,7 +54,7 @@ export const useLogin = () => {
 		setErrorMessage(null)
 
 		try {
-			const success = await fetch('http://test.feryafox.ru/api/auth/login', {
+			const success = await fetch('http://127.0.0.1:8080/auth/login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json;charset=utf-8' },
 				body: JSON.stringify(data),

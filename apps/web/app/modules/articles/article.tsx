@@ -10,7 +10,6 @@ interface Props {
 }
 
 export default function Article({ article }: Props) {
-	console.log(article)
 	const dialogRef = useRef<HTMLDialogElement>(null)
 
 	return (
@@ -43,7 +42,7 @@ export default function Article({ article }: Props) {
 						</div>
 						<div className='text-sm text-gray-600'>
 							<span className='text-gray-400'>Редактор: </span>
-							{article.updateBy.surname} {article.updateBy.name.charAt(0)}.
+							{article.updatedBy.surname} {article.updatedBy.name.charAt(0)}.
 						</div>
 					</div>
 				</div>
