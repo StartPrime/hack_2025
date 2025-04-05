@@ -1,17 +1,22 @@
-// taskDialog.tsx
 'use client'
 
 import { RefObject, useEffect, useState } from 'react'
 import { ITask, IDetailedTask, TaskStatus, Priority } from '@/interfaces'
 import { useForm } from 'react-hook-form'
 import Edit from '@/lib/edit'
+import { apiClient } from '@/fetch/apiClient'
 
 interface Props {
 	dialogRef: RefObject<HTMLDialogElement | null>
-	taskId?: number
+	taskId?: number | null
+	onTaskUpdated?: () => Promise<void>
 }
 
-export default function TaskDialog({ dialogRef, taskId }: Props) {
+export default function TaskDialog({
+	dialogRef,
+	taskId,
+	onTaskUpdated,
+}: Props) {
 	const [isEdit, setIsEdit] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
 	const [currentTask, setCurrentTask] = useState<
@@ -21,7 +26,7 @@ export default function TaskDialog({ dialogRef, taskId }: Props) {
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 		setValue,
 		watch,
 		reset,
@@ -40,47 +45,20 @@ export default function TaskDialog({ dialogRef, taskId }: Props) {
 		},
 	})
 
-	// Заглушка для запроса задачи
 	const fetchTask = async () => {
 		setIsLoading(true)
 		try {
-			// Имитация запроса
-			await new Promise(resolve => setTimeout(resolve, 500))
-
-			// Статичная тестовая задача
-			const mockTask: ITask & IDetailedTask = {
-				id: taskId || 1,
-				title: 'Тестовая задача',
-				description: '<p>Это описание тестовой задачи</p>',
-				createAt: '2023-05-15',
-				dueDate: '2023-06-20',
-				priority: Priority.HIGH,
-				status: TaskStatus.ACTIVE,
-				assignedTo: {
-					name: 'Иван',
-					surname: 'Иванов',
-					middleName: 'Иванович',
-				},
-				createdBy: {
-					name: 'Петр',
-					surname: 'Петров',
-					middleName: 'Петрович',
-				},
-				updatedBy: {
-					name: 'Петр',
-					surname: 'Петров',
-					middleName: 'Петрович',
-				},
-			}
-
-			setCurrentTask(mockTask)
+			const data: ITask & IDetailedTask = await apiClient(`/tasks/${taskId}`, {
+				method: 'GET',
+			})
+			setCurrentTask(data)
 			reset({
-				title: mockTask.title,
-				description: mockTask.description,
-				assignedTo: mockTask.assignedTo,
-				dueDate: mockTask.dueDate,
-				priority: mockTask.priority,
-				status: mockTask.status,
+				title: data.title,
+				description: data.description,
+				assignedTo: data.assignedTo,
+				dueDate: data.dueDate.split('T')[0],
+				priority: data.priority,
+				status: data.status,
 			})
 		} catch (error) {
 			console.error('Ошибка при загрузке задачи:', error)
@@ -89,10 +67,8 @@ export default function TaskDialog({ dialogRef, taskId }: Props) {
 		}
 	}
 
-	// Обработчик мутаций для отслеживания открытия/закрытия диалога
 	useEffect(() => {
 		const dialog = dialogRef.current
-
 		if (!dialog) return
 
 		const observer = new MutationObserver(mutations => {
@@ -102,21 +78,42 @@ export default function TaskDialog({ dialogRef, taskId }: Props) {
 						fetchTask()
 					} else {
 						setIsEdit(false)
+						setCurrentTask(null)
+						reset()
 					}
 				}
 			})
 		})
 
 		observer.observe(dialog, { attributes: true })
-
-		return () => {
-			observer.disconnect()
-		}
+		return () => observer.disconnect()
 	}, [taskId])
 
-	const onSubmit = (data: any) => {
-		console.log(isEdit ? 'Сохранение задачи:' : 'Создание задачи:', data)
-		dialogRef.current?.close()
+	const onSubmit = async (data: any) => {
+		try {
+			if (currentTask) {
+				await apiClient(`/tasks/update`, {
+					method: 'POST',
+					body: JSON.stringify({
+						...data,
+						dueDate: `${data.dueDate}T00:00:00Z`,
+					}),
+				})
+			} else {
+				await apiClient('/tasks/', {
+					method: 'POST',
+					body: JSON.stringify({
+						...data,
+						dueDate: `${data.dueDate}T00:00:00Z`,
+					}),
+				})
+			}
+
+			dialogRef.current?.close()
+			onTaskUpdated && (await onTaskUpdated())
+		} catch (error) {
+			console.error('Ошибка при сохранении задачи:', error)
+		}
 	}
 
 	const handleContentChange = (content: string) => {
@@ -127,9 +124,14 @@ export default function TaskDialog({ dialogRef, taskId }: Props) {
 		dialogRef.current?.close()
 	}
 
-	const handleDelete = () => {
-		console.log('Удаление задачи:', currentTask?.id)
-		dialogRef.current?.close()
+	const handleDelete = async () => {
+		try {
+			await apiClient(`/tasks/${currentTask?.id}`, { method: 'DELETE' })
+			dialogRef.current?.close()
+			onTaskUpdated && (await onTaskUpdated())
+		} catch (error) {
+			console.error('Ошибка при удалении задачи:', error)
+		}
 	}
 
 	if (isLoading) {
@@ -143,7 +145,6 @@ export default function TaskDialog({ dialogRef, taskId }: Props) {
 
 	return (
 		<div className='flex flex-col h-full'>
-			{/* Шапка диалога */}
 			<div className='sticky top-0 z-10 bg-white p-4 border-b flex justify-between items-center'>
 				<h2 className='text-xl font-bold text-gray-800'>
 					{isEdit
@@ -161,13 +162,11 @@ export default function TaskDialog({ dialogRef, taskId }: Props) {
 				</button>
 			</div>
 
-			{/* Форма */}
 			<form
 				onSubmit={handleSubmit(onSubmit)}
 				className='flex flex-col flex-grow p-6 overflow-y-auto'
 			>
 				<div className='space-y-6 flex-grow'>
-					{/* Название задачи */}
 					<div>
 						<label className='block text-sm font-medium text-gray-700 mb-1'>
 							Название задачи {isEdit && '*'}
@@ -188,7 +187,6 @@ export default function TaskDialog({ dialogRef, taskId }: Props) {
 						)}
 					</div>
 
-					{/* Ответственный */}
 					<div>
 						<label className='block text-sm font-medium text-gray-700 mb-1'>
 							Ответственный
@@ -220,7 +218,6 @@ export default function TaskDialog({ dialogRef, taskId }: Props) {
 						)}
 					</div>
 
-					{/* Дата дедлайна и приоритет */}
 					<div className='grid grid-cols-2 gap-4'>
 						<div>
 							<label className='block text-sm font-medium text-gray-700 mb-1'>
@@ -265,7 +262,6 @@ export default function TaskDialog({ dialogRef, taskId }: Props) {
 						</div>
 					</div>
 
-					{/* Статус */}
 					<div>
 						<label className='block text-sm font-medium text-gray-700 mb-1'>
 							Статус
@@ -292,7 +288,6 @@ export default function TaskDialog({ dialogRef, taskId }: Props) {
 						)}
 					</div>
 
-					{/* Описание */}
 					<div className='flex-grow'>
 						<label className='block text-sm font-medium text-gray-700 mb-1'>
 							Описание
@@ -313,7 +308,6 @@ export default function TaskDialog({ dialogRef, taskId }: Props) {
 					</div>
 				</div>
 
-				{/* Кнопки */}
 				<div className='sticky bottom-0 bg-white pt-4 flex justify-end gap-2'>
 					{!isEdit && currentTask && (
 						<>
@@ -345,9 +339,14 @@ export default function TaskDialog({ dialogRef, taskId }: Props) {
 							</button>
 							<button
 								type='submit'
-								className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
+								disabled={isSubmitting}
+								className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed'
 							>
-								{currentTask ? 'Сохранить' : 'Создать'}
+								{isSubmitting
+									? 'Сохранение...'
+									: currentTask
+										? 'Сохранить'
+										: 'Создать'}
 							</button>
 						</>
 					)}

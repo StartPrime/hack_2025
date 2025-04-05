@@ -8,7 +8,7 @@ import { TaskStatus, Priority } from '@/interfaces'
 import { apiClient } from '@/fetch/apiClient'
 
 interface User {
-	id: number
+	id: string
 	firstName: string
 	surname: string
 	middleName: string
@@ -16,6 +16,7 @@ interface User {
 
 interface Props {
 	dialogRef: RefObject<HTMLDialogElement | null>
+	onTaskCreated?: () => Promise<void>
 }
 
 interface FormData {
@@ -27,7 +28,7 @@ interface FormData {
 	description: string
 }
 
-export default function CreateTaskDialog({ dialogRef }: Props) {
+export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 	const [users, setUsers] = useState<User[]>([])
 	const [isUsersLoading, setIsUsersLoading] = useState(false)
 	const [showUserDropdown, setShowUserDropdown] = useState(false)
@@ -36,9 +37,10 @@ export default function CreateTaskDialog({ dialogRef }: Props) {
 	const {
 		register,
 		handleSubmit,
-		formState: { errors },
+		formState: { errors, isSubmitting },
 		setValue,
 		watch,
+		reset,
 	} = useForm<FormData>({
 		defaultValues: {
 			title: '',
@@ -55,9 +57,7 @@ export default function CreateTaskDialog({ dialogRef }: Props) {
 		const fetchUsers = async () => {
 			setIsUsersLoading(true)
 			try {
-				// Заглушка для запроса пользователей
 				const users: User[] = await apiClient('/users/', { method: 'GET' })
-
 				setUsers(users)
 			} catch (error) {
 				console.error('Ошибка при загрузке пользователей:', error)
@@ -69,9 +69,28 @@ export default function CreateTaskDialog({ dialogRef }: Props) {
 		fetchUsers()
 	}, [])
 
-	const onSubmit = (data: FormData) => {
-		console.log('Создание задачи:', data)
-		dialogRef.current?.close()
+	const onSubmit = async (data: FormData) => {
+		try {
+			const taskData = {
+				title: data.title,
+				description: data.description,
+				assignedTo: data.assignedTo?.id || '',
+				priority: data.priority,
+				status: data.status,
+				dueDate: `${data.dueDate}T00:00:00Z`, // Форматируем дату для сервера
+			}
+
+			await apiClient('/tasks/', {
+				method: 'POST',
+				body: JSON.stringify(taskData),
+			})
+
+			dialogRef.current?.close()
+			reset()
+			onTaskCreated?.()
+		} catch (error) {
+			console.error('Ошибка при создании задачи:', error)
+		}
 	}
 
 	const handleContentChange = (content: string) => {
@@ -80,6 +99,7 @@ export default function CreateTaskDialog({ dialogRef }: Props) {
 
 	const handleClose = () => {
 		dialogRef.current?.close()
+		reset()
 	}
 
 	const handleUserSelect = (user: User) => {
@@ -273,9 +293,10 @@ export default function CreateTaskDialog({ dialogRef }: Props) {
 					</button>
 					<button
 						type='submit'
-						className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
+						disabled={isSubmitting}
+						className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed'
 					>
-						Создать
+						{isSubmitting ? 'Создание...' : 'Создать'}
 					</button>
 				</div>
 			</form>

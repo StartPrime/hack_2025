@@ -36,7 +36,7 @@ export interface IDetailedArticle extends IArticle {
 export interface ITask {
 	id: number
 	title: string
-	createAt: string
+	createdAt: string
 	assignedTo: {
 		name: string
 		surname: string
