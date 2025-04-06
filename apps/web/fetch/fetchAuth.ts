@@ -16,7 +16,7 @@ export const useRegister = () => {
 
 		try {
 			const userData = { ...data, role: 'BUYER' }
-			const response = await fetch(BASE_URL, {
+			const response = await fetch(`${BASE_URL}/auth/register`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json;charset=utf-8' },
 				body: JSON.stringify(userData),
@@ -55,7 +55,7 @@ export const useLogin = () => {
 		setErrorMessage(null)
 
 		try {
-			const success = await fetch(BASE_URL, {
+			const success = await fetch(`${BASE_URL}/auth/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json;charset=utf-8' },
 				body: JSON.stringify(data),
