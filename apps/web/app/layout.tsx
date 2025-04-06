@@ -1,5 +1,4 @@
 import { Roboto_Mono } from 'next/font/google'
-
 import '@workspace/ui/globals.css'
 import { Providers } from '@/components/providers'
 
@@ -10,6 +9,14 @@ const fontRoboto = Roboto_Mono({
 	display: 'swap',
 })
 
+export const metadata = {
+	title: 'Технические статьи и руководства',
+	description: 'Коллекция полезных технических статей и руководств',
+	icons: {
+		icon: '/favicon.svg',
+	},
+}
+
 export default function ArticlesLayout({
 	children,
 }: Readonly<{
@@ -17,7 +24,9 @@ export default function ArticlesLayout({
 }>) {
 	return (
 		<html lang='ru' suppressHydrationWarning>
-			<body className={`${fontRoboto} font-sans antialiased bg-gray-200`}>
+			<body
+				className={`${fontRoboto.variable} font-sans antialiased bg-gray-200`}
+			>
 				<Providers>{children}</Providers>
 			</body>
 		</html>

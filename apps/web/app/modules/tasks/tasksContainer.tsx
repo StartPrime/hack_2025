@@ -284,7 +284,7 @@ export default function TasksContainer() {
 
 			<dialog
 				ref={viewDialogRef}
-				className='p-0 w-full max-w-2xl rounded-xl backdrop:bg-black/50 m-auto'
+				className='p-0 w-full max-w-2xl rounded-xl backdrop:bg-black/50 backdrop:backdrop-blur-sm m-auto'
 			>
 				<TaskDialog
 					dialogRef={viewDialogRef}
@@ -295,7 +295,7 @@ export default function TasksContainer() {
 
 			<dialog
 				ref={createDialogRef}
-				className='p-0 w-full max-w-2xl rounded-xl backdrop:bg-black/50 m-auto'
+				className='p-0 w-full max-w-2xl rounded-xl backdrop:bg-black/50 backdrop:backdrop-blur-sm m-auto'
 			>
 				<CreateTaskDialog
 					dialogRef={createDialogRef}
