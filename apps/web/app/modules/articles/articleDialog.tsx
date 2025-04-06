@@ -5,6 +5,7 @@ import { IDetailedArticle } from '@/interfaces'
 import { Button } from '@workspace/ui/components/button'
 import AddArticleDialog from './addArticleDialog'
 import { apiClient } from '@/fetch/apiClient'
+import { toast } from 'react-toastify'
 
 interface Props {
 	dialogRef: RefObject<HTMLDialogElement | null>
@@ -73,10 +74,12 @@ export default function ArticleDialog({
 			await apiClient(`/articles/${articleId}`, {
 				method: 'DELETE',
 			})
+
 			dialogRef.current?.close()
 			setReload()
+			toast.success('Статью можно восстановить в течение 7 дней')
 		} catch (err) {
-			console.error('Ошибка при удал	ении статьи:', err)
+			console.error('Ошибка при удалении статьи:', err)
 		}
 	}
 

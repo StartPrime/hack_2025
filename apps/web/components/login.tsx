@@ -22,7 +22,9 @@ export default function Login() {
 
 	async function handleSubmitLogin(data: ILoginUser) {
 		const res = await loginUser(data)
+		console.log(res)
 		if (res) {
+			console.log(1)
 			router.replace('/modules/articles')
 		}
 	}

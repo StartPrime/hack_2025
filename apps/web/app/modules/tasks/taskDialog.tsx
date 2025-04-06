@@ -25,7 +25,6 @@ export default function TaskDialog({
 	onTaskUpdated,
 }: Props) {
 	const [isEditMode, setIsEditMode] = useState(false)
-	const [isLoading, setIsLoading] = useState(false)
 	const [taskDetails, setTaskDetails] = useState<
 		(ITask & IDetailedTask) | null
 	>(null)
@@ -33,7 +32,6 @@ export default function TaskDialog({
 	const [isUsersLoading, setIsUsersLoading] = useState(false)
 	const [showUserDropdown, setShowUserDropdown] = useState(false)
 	const [searchTerm, setSearchTerm] = useState('')
-
 	const {
 		register,
 		handleSubmit,
@@ -71,8 +69,6 @@ export default function TaskDialog({
 
 	const fetchTaskDetails = async () => {
 		if (!taskId) return
-
-		setIsLoading(true)
 		try {
 			const data: ITask & IDetailedTask = await apiClient(`/tasks/${taskId}`, {
 				method: 'GET',
@@ -98,7 +94,6 @@ export default function TaskDialog({
 		} catch (error) {
 			console.error('Ошибка при загрузке задачи:', error)
 		} finally {
-			setIsLoading(false)
 		}
 	}
 
@@ -119,7 +114,7 @@ export default function TaskDialog({
 					id: taskDetails.id,
 					title: data.title,
 					description: data.description,
-					assignedTo: data.assignedTo.id, // Отправляем ID пользователя
+					assignedTo: data.assignedTo.id,
 					priority: data.priority,
 					status: data.status,
 					dueDate: `${data.dueDate}T00:00:00Z`,
@@ -129,6 +124,10 @@ export default function TaskDialog({
 					method: 'PUT',
 					body: JSON.stringify(taskData),
 				})
+			}
+
+			if (taskId) {
+				await fetchTaskDetails()
 			}
 
 			dialogRef.current?.close()
@@ -171,15 +170,6 @@ export default function TaskDialog({
 	})
 
 	const assignedTo = watch('assignedTo')
-
-	if (isLoading) {
-		return (
-			<div className='flex flex-col h-full items-center justify-center'>
-				<div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500'></div>
-				<p className='mt-4 text-gray-600'>Загрузка задачи...</p>
-			</div>
-		)
-	}
 
 	return (
 		<div className='flex flex-col h-full'>
@@ -378,7 +368,7 @@ export default function TaskDialog({
 							/>
 						) : (
 							<div
-								className='w-full px-4 py-2 border rounded bg-gray-50 min-h-[200px]'
+								className='w-full px-4 py-2 border rounded bg-gray-50 min-h-[100px]'
 								dangerouslySetInnerHTML={{
 									__html: taskDetails?.description || 'Нет описания',
 								}}

@@ -6,7 +6,7 @@ import AddArticleDialog from './addArticleDialog'
 import { PlusIcon } from '@/lib/icons'
 import { apiClient } from '@/fetch/apiClient'
 import { IArticle } from '@/interfaces'
-import Logs from './logs' // Импортируем компонент логов
+import Logs from './logs'
 
 export default function ArticleContainer() {
 	const dialogRef = useRef<HTMLDialogElement>(null)
@@ -14,7 +14,7 @@ export default function ArticleContainer() {
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const [isReload, setIsReload] = useState(false)
-	const [showLogs, setShowLogs] = useState(false) // Состояние для отображения логов
+	const [showLogs, setShowLogs] = useState(false)
 
 	const setReload = () => {
 		setIsReload(!isReload)

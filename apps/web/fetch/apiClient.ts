@@ -19,12 +19,10 @@ export async function apiClient<T>(
 		...options.headers,
 	}
 
-	// Добавляем токен, если он есть и не отключен noAuth
 	if (accessToken && !options.noAuth) {
 		headers['Authorization'] = `Bearer ${accessToken}`
 	}
 
-	// Не устанавливаем Content-Type для FormData
 	if (!(options.body instanceof FormData)) {
 		headers['Content-Type'] = 'application/json'
 	}
@@ -32,7 +30,7 @@ export async function apiClient<T>(
 	const config: RequestInit = {
 		...options,
 		headers,
-		credentials: 'include', // Добавляем credentials для куков
+		credentials: 'include',
 	}
 
 	try {
@@ -43,7 +41,6 @@ export async function apiClient<T>(
 			throw new Error(errorData?.message || 'Request failed')
 		}
 
-		// Для ответов без тела (например, 204 No Content)
 		if (response.status === 204) {
 			return undefined as unknown as T
 		}

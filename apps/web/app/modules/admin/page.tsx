@@ -33,16 +33,55 @@ export default function Admin() {
 		surname: '',
 		role: 'user',
 	})
+	const [hasAccess, setHasAccess] = useState<boolean | null>(null)
+	const [isLoading, setIsLoading] = useState(true)
+
+	useEffect(() => {
+		const accessToken = localStorage.getItem('accessToken')
+		const refreshToken = localStorage.getItem('refreshToken')
+		setHasAccess(!!accessToken && !!refreshToken)
+	}, [])
 
 	// Загрузка пользователей
 	useEffect(() => {
-		const response = async () => {
-			const users: IUser[] = await apiClient('/admin/', { method: 'GET' })
-			setUsers(users)
+		const fetchUsers = async () => {
+			setIsLoading(true)
+			try {
+				const users: IUser[] = await apiClient('/admin/', { method: 'GET' })
+				setUsers(users)
+			} catch {
+				setHasAccess(false)
+			} finally {
+				setIsLoading(false)
+			}
 		}
 
-		response()
-	}, [])
+		if (hasAccess) fetchUsers()
+	}, [hasAccess])
+
+	if (hasAccess === null || isLoading) {
+		return (
+			<div className='flex justify-center items-center min-h-screen'>
+				<div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500'></div>
+			</div>
+		)
+	}
+
+	if (!hasAccess) {
+		return (
+			<div className='flex justify-center items-center min-h-screen'>
+				<div className='bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center'>
+					<div className='text-red-500 text-3xl mb-4'>🚫</div>
+					<h2 className='text-2xl font-bold text-gray-800 mb-2'>
+						Доступ запрещен
+					</h2>
+					<p className='text-gray-600'>
+						У вас нет прав для просмотра этой страницы
+					</p>
+				</div>
+			</div>
+		)
+	}
 
 	// Фильтрация пользователей
 	const filteredUsers = users.filter(user => {
@@ -117,6 +156,8 @@ export default function Admin() {
 
 	// Удаление пользователя
 	const handleDelete = async (id: string) => {
+		if (!confirm('Вы уверены, что хотите удалить этого пользователя?')) return
+
 		try {
 			await apiClient(`/admin/${id}`, { method: 'DELETE' })
 			setUsers(users.filter(u => u.id !== id))
@@ -178,195 +219,261 @@ export default function Admin() {
 	}
 
 	return (
-		<div className='mt-12'>
+		<div className='min-h-screen py-8'>
 			<Container>
-				<h1 className='text-2xl font-bold mb-6'>Управление пользователями</h1>
-				{/* Панель фильтрации */}
-				<div className='flex flex-wrap gap-4 mb-6'>
-					<input
-						type='text'
-						name='login'
-						placeholder='Поиск по логину'
-						value={filters.login}
-						onChange={handleFilterChange}
-						className='px-4 py-2 border rounded'
-					/>
-					<input
-						type='text'
-						name='name'
-						placeholder='Поиск по ФИО'
-						value={filters.name}
-						onChange={handleFilterChange}
-						className='px-4 py-2 border rounded'
-					/>
-					<select
-						name='role'
-						value={filters.role}
-						onChange={handleFilterChange}
-						className='px-4 py-2 border rounded'
-					>
-						<option value=''>Все роли</option>
-						<option value='ROLE_USER'>Пользователь</option>
-						<option value='ROLE_ADMIN'>Администратор</option>
-					</select>
-					<input
-						type='date'
-						name='date'
-						value={filters.date}
-						onChange={handleFilterChange}
-						className='px-4 py-2 border rounded'
-					/>
-					<button
-						onClick={() =>
-							setFilters({ login: '', name: '', role: '', date: '' })
-						}
-						className='px-4 py-2 bg-gray-200 rounded hover:bg-gray-300'
-					>
-						Сбросить
-					</button>
+				<div className='bg-white rounded-xl shadow-md overflow-hidden'>
+					<div className='p-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white'>
+						<h1 className='text-2xl font-bold'>Управление пользователями</h1>
+						<p className='opacity-90'>Всего пользователей: {users.length}</p>
+					</div>
+
+					{/* Фильтры */}
+					<div className='p-4 border-b'>
+						<div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+							<div>
+								<label className='block text-sm font-medium text-gray-700 mb-1'>
+									Логин
+								</label>
+								<input
+									type='text'
+									name='login'
+									placeholder='Поиск по логину'
+									value={filters.login}
+									onChange={handleFilterChange}
+									className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer'
+								/>
+							</div>
+							<div>
+								<label className='block text-sm font-medium text-gray-700 mb-1'>
+									ФИО
+								</label>
+								<input
+									type='text'
+									name='name'
+									placeholder='Поиск по ФИО'
+									value={filters.name}
+									onChange={handleFilterChange}
+									className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer'
+								/>
+							</div>
+							<div>
+								<label className='block text-sm font-medium text-gray-700 mb-1'>
+									Роль
+								</label>
+								<select
+									name='role'
+									value={filters.role}
+									onChange={handleFilterChange}
+									className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer'
+								>
+									<option value=''>Все роли</option>
+									<option value='ROLE_USER'>Пользователь</option>
+									<option value='ROLE_ADMIN'>Администратор</option>
+								</select>
+							</div>
+							<div className='flex items-end'>
+								<button
+									onClick={() =>
+										setFilters({ login: '', name: '', role: '', date: '' })
+									}
+									className='w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors cursor-pointer'
+								>
+									Сбросить фильтры
+								</button>
+							</div>
+						</div>
+					</div>
+
+					{/* Таблица пользователей */}
+					<div className='overflow-x-auto'>
+						<table className='min-w-full divide-y divide-gray-200'>
+							<thead className='bg-gray-50'>
+								<tr>
+									<th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+										Логин
+									</th>
+									<th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+										ФИО
+									</th>
+									<th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+										Роль
+									</th>
+									<th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+										Дата регистрации
+									</th>
+									<th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+										Действия
+									</th>
+								</tr>
+							</thead>
+							<tbody className='bg-white divide-y divide-gray-200'>
+								{filteredUsers.length > 0 ? (
+									filteredUsers.map((user, index) => (
+										<tr
+											key={index}
+											className='hover:bg-gray-50 transition-colors'
+										>
+											<td className='px-6 py-4 whitespace-nowrap'>
+												<div className='text-sm font-medium text-gray-900'>
+													{user.login}
+												</div>
+											</td>
+											<td className='px-6 py-4 whitespace-nowrap'>
+												<div className='text-sm text-gray-900'>{`${user.surname} ${user.firstName} ${user.middleName}`}</div>
+											</td>
+											<td className='px-6 py-4 whitespace-nowrap'>
+												<select
+													value={user.role === 'ROLE_ADMIN' ? 'admin' : 'user'}
+													onChange={e =>
+														handleRoleChange(user.id, e.target.value)
+													}
+													className='text-sm text-gray-900 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer'
+												>
+													<option value='user'>Пользователь</option>
+													<option value='admin'>Администратор</option>
+												</select>
+											</td>
+											<td className='px-6 py-4 whitespace-nowrap'>
+												<div className='text-sm text-gray-500'>
+													{formatDate(user.registrationDate)}
+												</div>
+											</td>
+											<td className='px-6 py-4 whitespace-nowrap'>
+												<div className='flex space-x-2'>
+													<button
+														onClick={() => handleEdit(user)}
+														className='px-3 py-1 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-colors text-sm cursor-pointer'
+													>
+														Редактировать
+													</button>
+													<button
+														onClick={() => {
+															setPasswordUser(user)
+															setNewPassword('')
+															setConfirmPassword('')
+														}}
+														className='px-3 py-1 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors text-sm cursor-pointer'
+													>
+														Пароль
+													</button>
+													<button
+														onClick={() => handleDelete(user.id)}
+														className='px-3 py-1 bg-red-100 text-red-800 rounded-md hover:bg-red-200 transition-colors text-sm cursor-pointer'
+													>
+														Удалить
+													</button>
+												</div>
+											</td>
+										</tr>
+									))
+								) : (
+									<tr>
+										<td
+											colSpan={5}
+											className='px-6 py-4 text-center text-sm text-gray-500'
+										>
+											Пользователи не найдены
+										</td>
+									</tr>
+								)}
+							</tbody>
+						</table>
+					</div>
 				</div>
-				{/* Таблица пользователей */}
-				<div className='overflow-x-auto'>
-					<table className='min-w-full border'>
-						<thead>
-							<tr className='bg-gray-100'>
-								<th className='border px-4 py-2 text-left'>Логин</th>
-								<th className='border px-4 py-2 text-left'>ФИО</th>
-								<th className='border px-4 py-2 text-left'>Роль</th>
-								<th className='border px-4 py-2 text-left'>Дата регистрации</th>
-								<th className='border px-4 py-2 text-left'>Действия</th>
-							</tr>
-						</thead>
-						<tbody>
-							{filteredUsers.map((user, index) => (
-								<tr key={index} className='hover:bg-gray-50'>
-									<td className='border px-4 py-2'>{user.login}</td>
-									<td className='border px-4 py-2'>{`${user.surname} ${user.firstName} ${user.middleName}`}</td>
-									<td className='border px-4 py-2'>
+
+				{/* Модальное окно редактирования */}
+				{editUser && (
+					<div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
+						<div className='bg-white rounded-lg shadow-xl w-full max-w-md'>
+							<div className='p-6'>
+								<h2 className='text-xl font-bold text-gray-800 mb-4'>
+									Редактирование пользователя
+								</h2>
+								<div className='space-y-4'>
+									<div>
+										<label className='block text-sm font-medium text-gray-700 mb-1'>
+											Логин:
+										</label>
+										<input
+											type='text'
+											value={editForm.login}
+											onChange={e =>
+												setEditForm({ ...editForm, login: e.target.value })
+											}
+											className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${!validateLogin(editForm.login) ? 'border-red-500' : 'border-gray-300'}`}
+										/>
+										{!validateLogin(editForm.login) && (
+											<p className='mt-1 text-sm text-red-600'>
+												Только латинские буквы
+											</p>
+										)}
+									</div>
+									<div>
+										<label className='block text-sm font-medium text-gray-700 mb-1'>
+											Фамилия:
+										</label>
+										<input
+											type='text'
+											value={editForm.surname}
+											onChange={e =>
+												setEditForm({ ...editForm, surname: e.target.value })
+											}
+											className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${!validateName(editForm.surname) ? 'border-red-500' : 'border-gray-300'}`}
+										/>
+									</div>
+									<div>
+										<label className='block text-sm font-medium text-gray-700 mb-1'>
+											Имя:
+										</label>
+										<input
+											type='text'
+											value={editForm.firstName}
+											onChange={e =>
+												setEditForm({ ...editForm, firstName: e.target.value })
+											}
+											className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${!validateName(editForm.firstName) ? 'border-red-500' : 'border-gray-300'}`}
+										/>
+									</div>
+									<div>
+										<label className='block text-sm font-medium text-gray-700 mb-1'>
+											Отчество:
+										</label>
+										<input
+											type='text'
+											value={editForm.middleName}
+											onChange={e =>
+												setEditForm({ ...editForm, middleName: e.target.value })
+											}
+											className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${!validateName(editForm.middleName) ? 'border-red-500' : 'border-gray-300'}`}
+										/>
+									</div>
+									<div>
+										<label className='block text-sm font-medium text-gray-700 mb-1'>
+											Роль:
+										</label>
 										<select
-											value={user.role === 'ROLE_ADMIN' ? 'admin' : 'user'}
-											onChange={e => handleRoleChange(user.id, e.target.value)}
-											className='w-full px-2 py-1 border rounded'
+											value={editForm.role}
+											onChange={e =>
+												setEditForm({ ...editForm, role: e.target.value })
+											}
+											className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
 										>
 											<option value='user'>Пользователь</option>
 											<option value='admin'>Администратор</option>
 										</select>
-									</td>
-									<td className='border px-4 py-2'>
-										{formatDate(user.registrationDate)}
-									</td>
-									<td className='border px-4 py-2'>
-										<div className='flex gap-2'>
-											<button
-												onClick={() => handleEdit(user)}
-												className='px-3 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200'
-											>
-												Редактировать
-											</button>
-											<button
-												onClick={() => {
-													setPasswordUser(user)
-													setNewPassword('')
-													setConfirmPassword('')
-												}}
-												className='px-3 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200'
-											>
-												Пароль
-											</button>
-											<button
-												onClick={() => handleDelete(user.id)}
-												className='px-3 py-1 bg-red-100 text-red-800 rounded hover:bg-red-200'
-											>
-												Удалить
-											</button>
-										</div>
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
-				{/* Модальное окно редактирования */}
-				{editUser && (
-					<div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
-						<div className='bg-white rounded-lg p-6 w-full max-w-md'>
-							<h2 className='text-xl font-bold mb-4'>
-								Редактирование пользователя
-							</h2>
-							<div className='space-y-4'>
-								<div>
-									<label className='block mb-1'>Логин:</label>
-									<input
-										type='text'
-										value={editForm.login}
-										onChange={e =>
-											setEditForm({ ...editForm, login: e.target.value })
-										}
-										className={`w-full px-3 py-2 border rounded ${!validateLogin(editForm.login) ? 'border-red-500' : ''}`}
-									/>
-									{!validateLogin(editForm.login) && (
-										<p className='text-red-500 text-sm mt-1'>
-											Только латинские буквы
-										</p>
-									)}
-								</div>
-								<div>
-									<label className='block mb-1'>Фамилия:</label>
-									<input
-										type='text'
-										value={editForm.surname}
-										onChange={e =>
-											setEditForm({ ...editForm, surname: e.target.value })
-										}
-										className={`w-full px-3 py-2 border rounded ${!validateName(editForm.surname) ? 'border-red-500' : ''}`}
-									/>
-								</div>
-								<div>
-									<label className='block mb-1'>Имя:</label>
-									<input
-										type='text'
-										value={editForm.firstName}
-										onChange={e =>
-											setEditForm({ ...editForm, firstName: e.target.value })
-										}
-										className={`w-full px-3 py-2 border rounded ${!validateName(editForm.firstName) ? 'border-red-500' : ''}`}
-									/>
-								</div>
-								<div>
-									<label className='block mb-1'>Отчество:</label>
-									<input
-										type='text'
-										value={editForm.middleName}
-										onChange={e =>
-											setEditForm({ ...editForm, middleName: e.target.value })
-										}
-										className={`w-full px-3 py-2 border rounded ${!validateName(editForm.middleName) ? 'border-red-500' : ''}`}
-									/>
-								</div>
-								<div>
-									<label className='block mb-1'>Роль:</label>
-									<select
-										value={editForm.role}
-										onChange={e =>
-											setEditForm({ ...editForm, role: e.target.value })
-										}
-										className='w-full px-3 py-2 border rounded'
-									>
-										<option value='user'>Пользователь</option>
-										<option value='admin'>Администратор</option>
-									</select>
+									</div>
 								</div>
 							</div>
-							<div className='flex justify-end gap-2 mt-6'>
+							<div className='bg-gray-50 px-6 py-4 flex justify-end space-x-3'>
 								<button
 									onClick={() => setEditUser(null)}
-									className='px-4 py-2 bg-gray-200 rounded hover:bg-gray-300'
+									className='px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors'
 								>
 									Отмена
 								</button>
 								<button
 									onClick={handleEditSubmit}
-									className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600'
+									className='px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors'
 								>
 									Сохранить
 								</button>
@@ -374,47 +481,55 @@ export default function Admin() {
 						</div>
 					</div>
 				)}
+
 				{/* Модальное окно смены пароля */}
 				{passwordUser && (
 					<div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
-						<div className='bg-white rounded-lg p-6 w-full max-w-md'>
-							<h2 className='text-xl font-bold mb-4'>
-								Смена пароля для {passwordUser.login}
-							</h2>
-							<div className='space-y-4'>
-								<div>
-									<label className='block mb-1'>Новый пароль:</label>
-									<input
-										type='password'
-										value={newPassword}
-										onChange={e => setNewPassword(e.target.value)}
-										className={`w-full px-3 py-2 border rounded ${!validatePassword(newPassword) ? 'border-red-500' : ''}`}
-									/>
-									{!validatePassword(newPassword) && (
-										<p className='text-red-500 text-sm mt-1'>
-											Только латинские буквы, цифры и спецсимволы
-										</p>
-									)}
-								</div>
-								<div>
-									<label className='block mb-1'>Подтверждение пароля:</label>
-									<input
-										type='password'
-										value={confirmPassword}
-										onChange={e => setConfirmPassword(e.target.value)}
-										className={`w-full px-3 py-2 border rounded ${newPassword !== confirmPassword ? 'border-red-500' : ''}`}
-									/>
-									{newPassword !== confirmPassword && (
-										<p className='text-red-500 text-sm mt-1'>
-											Пароли не совпадают
-										</p>
-									)}
+						<div className='bg-white rounded-lg shadow-xl w-full max-w-md'>
+							<div className='p-6'>
+								<h2 className='text-xl font-bold text-gray-800 mb-4'>
+									Смена пароля для{' '}
+									<span className='text-blue-600'>{passwordUser.login}</span>
+								</h2>
+								<div className='space-y-4'>
+									<div>
+										<label className='block text-sm font-medium text-gray-700 mb-1'>
+											Новый пароль:
+										</label>
+										<input
+											type='password'
+											value={newPassword}
+											onChange={e => setNewPassword(e.target.value)}
+											className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${!validatePassword(newPassword) ? 'border-red-500' : 'border-gray-300'}`}
+										/>
+										{!validatePassword(newPassword) && (
+											<p className='mt-1 text-sm text-red-600'>
+												Только латинские буквы, цифры и спецсимволы
+											</p>
+										)}
+									</div>
+									<div>
+										<label className='block text-sm font-medium text-gray-700 mb-1'>
+											Подтверждение пароля:
+										</label>
+										<input
+											type='password'
+											value={confirmPassword}
+											onChange={e => setConfirmPassword(e.target.value)}
+											className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${newPassword !== confirmPassword ? 'border-red-500' : 'border-gray-300'}`}
+										/>
+										{newPassword !== confirmPassword && (
+											<p className='mt-1 text-sm text-red-600'>
+												Пароли не совпадают
+											</p>
+										)}
+									</div>
 								</div>
 							</div>
-							<div className='flex justify-end gap-2 mt-6'>
+							<div className='bg-gray-50 px-6 py-4 flex justify-end space-x-3'>
 								<button
 									onClick={() => setPasswordUser(null)}
-									className='px-4 py-2 bg-gray-200 rounded hover:bg-gray-300'
+									className='px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors'
 								>
 									Отмена
 								</button>
@@ -425,12 +540,12 @@ export default function Admin() {
 										newPassword !== confirmPassword ||
 										!validatePassword(newPassword)
 									}
-									className={`px-4 py-2 text-white rounded ${
+									className={`px-4 py-2 text-white rounded-md transition-colors ${
 										!newPassword ||
 										newPassword !== confirmPassword ||
 										!validatePassword(newPassword)
 											? 'bg-gray-400 cursor-not-allowed'
-											: 'bg-green-500 hover:bg-green-600'
+											: 'bg-green-600 hover:bg-green-700'
 									}`}
 								>
 									Сохранить
