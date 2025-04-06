@@ -139,7 +139,7 @@ export default function AddArticleDialog({
 						<label className='block text-sm font-medium text-gray-700'>
 							Обложка статьи
 						</label>
-						<div className='flex items-center gap-4'>
+						<div className='flex sm:items-center gap-4 sm:flex-row flex-col'>
 							<label className='flex-1 cursor-pointer'>
 								<div className='relative group'>
 									<div className='aspect-video bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 group-hover:border-blue-400 transition-colors duration-200 flex items-center justify-center'>
@@ -166,7 +166,7 @@ export default function AddArticleDialog({
 								</div>
 							</label>
 							<div className='flex-1 space-y-2'>
-								<p className='text-sm text-gray-500'>
+								<p className='sm:text-sm text-[8px] text-gray-500 text-wrap'>
 									{imagePreview?.name || fileInputLabel}
 								</p>
 								<p className='text-xs text-gray-400'>

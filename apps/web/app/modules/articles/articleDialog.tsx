@@ -186,7 +186,7 @@ export default function ArticleDialog({
 						{/* Заголовок и мета-информация */}
 						<div className='mb-8'>
 							<div className='flex justify-between'>
-								<h1 className='text-3xl font-bold text-gray-900 mb-4'>
+								<h1 className='sm:text-3xl text-[20px] font-bold text-gray-900 mb-4'>
 									{currentArticle.title}
 								</h1>
 								<Button
