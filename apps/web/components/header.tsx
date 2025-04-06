@@ -17,7 +17,7 @@ export default function Header() {
 	return (
 		<header className='mt-4'>
 			<Container>
-				<nav className='flex justify-end gap-8'>
+				<nav className='flex justify-end gap-8 max-lg:pr-4 max-lg:text-xs flex-wrap'>
 					<Link
 						href='/modules/articles'
 						className={`cursor-pointer flex gap-1 items-center justify-center ${

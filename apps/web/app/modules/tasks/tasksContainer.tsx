@@ -144,19 +144,19 @@ export default function TasksContainer() {
 
 	return (
 		<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-			<div className='flex justify-between items-center mb-8'>
+			<div className='flex justify-between sm:items-center mb-8 sm:flex-row flex-col'>
 				<h1 className='text-2xl font-bold text-gray-900'>Задачи</h1>
-				<div className='flex gap-3'>
+				<div className='flex gap-3 max-sm:mt-4'>
 					<button
 						onClick={toggleHistory}
-						className='px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 cursor-pointer'
+						className='sm:px-4 px-2 max-sm:text-xs py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 cursor-pointer'
 					>
 						<span>{showHistory ? 'Скрыть историю' : 'История изменений'}</span>
 					</button>
 
 					<button
 						onClick={() => createDialogRef.current?.showModal()}
-						className='px-4 py-2 bg-primary text-white rounded-lg cursor-pointer transition-colors flex items-center gap-2'
+						className='sm:px-4 px-2 max-sm:text-xs py-2 bg-primary text-white rounded-lg cursor-pointer transition-colors flex items-center gap-2'
 					>
 						<PlusIcon className='w-5 h-5' />
 						<span>Добавить задачу</span>
@@ -223,10 +223,10 @@ export default function TasksContainer() {
 			)}
 
 			<div className='mb-6 border-b border-gray-200'>
-				<nav className='flex space-x-4'>
+				<nav className='flex sm:space-x-4 space-x-0'>
 					<button
 						onClick={() => setActiveTab(TaskStatus.ACTIVE)}
-						className={`px-3 py-2 font-medium text-sm rounded-t-md border-b-2 flex items-center cursor-pointer ${
+						className={`sm:px-4 py-2 font-medium sm:text-sm text-[10px] rounded-t-md border-b-2 flex items-center cursor-pointer ${
 							activeTab === TaskStatus.ACTIVE
 								? 'border-blue-500 text-blue-600'
 								: 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -240,7 +240,7 @@ export default function TasksContainer() {
 
 					<button
 						onClick={() => setActiveTab(TaskStatus.POSTPONED)}
-						className={`px-3 py-2 font-medium text-sm rounded-t-md border-b-2 flex items-center cursor-pointer ${
+						className={`sm:px-4 px-2 py-2 font-medium sm:text-sm text-[10px] rounded-t-md border-b-2 flex items-center cursor-pointer ${
 							activeTab === TaskStatus.POSTPONED
 								? 'border-purple-500 text-purple-600'
 								: 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -254,7 +254,7 @@ export default function TasksContainer() {
 
 					<button
 						onClick={() => setActiveTab(TaskStatus.COMPLETED)}
-						className={`px-3 py-2 font-medium text-sm rounded-t-md border-b-2 cursor-pointer ${
+						className={`sm:px-4 px-2 py-2 font-medium sm:text-sm text-[10px] rounded-t-md border-b-2 cursor-pointer ${
 							activeTab === TaskStatus.COMPLETED
 								? 'border-green-500 text-green-600'
 								: 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
