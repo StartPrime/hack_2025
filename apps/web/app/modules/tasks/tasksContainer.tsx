@@ -149,14 +149,14 @@ export default function TasksContainer() {
 				<div className='flex gap-3'>
 					<button
 						onClick={toggleHistory}
-						className='px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2'
+						className='px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 cursor-pointer'
 					>
 						<span>{showHistory ? 'Скрыть историю' : 'История изменений'}</span>
 					</button>
 
 					<button
 						onClick={() => createDialogRef.current?.showModal()}
-						className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2'
+						className='px-4 py-2 bg-primary text-white rounded-lg cursor-pointer transition-colors flex items-center gap-2'
 					>
 						<PlusIcon className='w-5 h-5' />
 						<span>Добавить задачу</span>

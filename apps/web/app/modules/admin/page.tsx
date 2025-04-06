@@ -222,7 +222,7 @@ export default function Admin() {
 		<div className='min-h-screen py-8'>
 			<Container>
 				<div className='bg-white rounded-xl shadow-md overflow-hidden'>
-					<div className='p-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white'>
+					<div className='p-6 bg-gradient-to-r bg-primary text-white'>
 						<h1 className='text-2xl font-bold'>Управление пользователями</h1>
 						<p className='opacity-90'>Всего пользователей: {users.length}</p>
 					</div>

@@ -116,13 +116,13 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 
 	return (
 		<div className='flex flex-col h-full'>
-			<div className='sticky top-0 z-10 bg-white p-4 border-b flex justify-between items-center'>
-				<h2 className='text-xl font-bold text-gray-800'>
+			<div className='sticky top-0 z-10 bg-white p-4 border-b border-gray-200 flex justify-between items-center shadow-sm'>
+				<h2 className='text-xl font-semibold text-gray-900'>
 					Создание новой задачи
 				</h2>
 				<button
 					onClick={handleClose}
-					className='text-gray-400 hover:text-gray-600 transition-colors cursor-pointer'
+					className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors duration-200 text-gray-500 hover:text-gray-700'
 					aria-label='Закрыть'
 				>
 					×
@@ -135,27 +135,40 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 			>
 				<div className='space-y-6 flex-grow'>
 					<div>
-						<label className='block text-sm font-medium text-gray-700 mb-1'>
+						<label className='block text-sm font-medium text-gray-700 mb-2'>
 							Название задачи *
 						</label>
 						<input
 							{...register('title', { required: true })}
-							className='w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+							className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all placeholder:text-gray-400'
 							placeholder='Введите название задачи'
 						/>
 						{errors.title && (
-							<p className='text-red-500 text-sm mt-1'>Это поле обязательно</p>
+							<div className='flex items-center gap-1.5 mt-1.5 text-red-600 text-sm'>
+								<svg
+									className='w-4 h-4 shrink-0'
+									fill='currentColor'
+									viewBox='0 0 20 20'
+								>
+									<path
+										fillRule='evenodd'
+										d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z'
+										clipRule='evenodd'
+									/>
+								</svg>
+								Это поле обязательно
+							</div>
 						)}
 					</div>
 
 					<div className='relative'>
-						<label className='block text-sm font-medium text-gray-700 mb-1'>
+						<label className='block text-sm font-medium text-gray-700 mb-2'>
 							Ответственный *
 						</label>
 						<div className='relative'>
 							{assignedTo ? (
 								<div
-									className='w-full px-4 py-2 border rounded bg-gray-50 cursor-pointer'
+									className='w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors'
 									onClick={() => setShowUserDropdown(!showUserDropdown)}
 								>
 									{`${assignedTo.surname} ${assignedTo.firstName} ${assignedTo.middleName}`}
@@ -167,31 +180,31 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 										value={searchTerm}
 										onChange={e => setSearchTerm(e.target.value)}
 										onFocus={() => setShowUserDropdown(true)}
-										className='w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+										className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all placeholder:text-gray-400'
 										placeholder='Начните вводить ФИО'
 									/>
 									{isUsersLoading && (
-										<div className='absolute right-3 top-3'>
-											<div className='animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400'></div>
+										<div className='absolute right-3 top-3.5'>
+											<div className='animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent'></div>
 										</div>
 									)}
 								</div>
 							)}
 
 							{showUserDropdown && (
-								<div className='absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto'>
+								<div className='absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto divide-y divide-gray-100'>
 									{filteredUsers.length > 0 ? (
 										filteredUsers.map(user => (
 											<div
 												key={user.id}
-												className='px-4 py-2 hover:bg-gray-100 cursor-pointer'
+												className='px-4 py-3 hover:bg-blue-50/80 transition-colors cursor-pointer text-gray-700 hover:text-blue-800'
 												onClick={() => handleUserSelect(user)}
 											>
 												{`${user.surname} ${user.firstName} ${user.middleName}`}
 											</div>
 										))
 									) : (
-										<div className='px-4 py-2 text-gray-500'>
+										<div className='px-4 py-3 text-gray-500'>
 											{isUsersLoading
 												? 'Загрузка...'
 												: 'Пользователи не найдены'}
@@ -205,33 +218,57 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 							{...register('assignedTo', { required: true })}
 						/>
 						{errors.assignedTo && (
-							<p className='text-red-500 text-sm mt-1'>Это поле обязательно</p>
+							<div className='flex items-center gap-1.5 mt-1.5 text-red-600 text-sm'>
+								<svg
+									className='w-4 h-4 shrink-0'
+									fill='currentColor'
+									viewBox='0 0 20 20'
+								>
+									<path
+										fillRule='evenodd'
+										d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z'
+										clipRule='evenodd'
+									/>
+								</svg>
+								Это поле обязательно
+							</div>
 						)}
 					</div>
 
 					<div className='grid grid-cols-2 gap-4'>
 						<div>
-							<label className='block text-sm font-medium text-gray-700 mb-1'>
+							<label className='block text-sm font-medium text-gray-700 mb-2'>
 								Дата дедлайна *
 							</label>
 							<input
 								type='date'
 								{...register('dueDate', { required: true })}
-								className='w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+								className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all'
 							/>
 							{errors.dueDate && (
-								<p className='text-red-500 text-sm mt-1'>
+								<div className='flex items-center gap-1.5 mt-1.5 text-red-600 text-sm'>
+									<svg
+										className='w-4 h-4 shrink-0'
+										fill='currentColor'
+										viewBox='0 0 20 20'
+									>
+										<path
+											fillRule='evenodd'
+											d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z'
+											clipRule='evenodd'
+										/>
+									</svg>
 									Это поле обязательно
-								</p>
+								</div>
 							)}
 						</div>
 						<div>
-							<label className='block text-sm font-medium text-gray-700 mb-1'>
+							<label className='block text-sm font-medium text-gray-700 mb-2'>
 								Приоритет *
 							</label>
 							<select
 								{...register('priority', { required: true })}
-								className='w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+								className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all appearance-none bg-select-chevron bg-no-repeat bg-right-2'
 							>
 								{Object.values(Priority).map(priority => (
 									<option key={priority} value={priority}>
@@ -245,12 +282,12 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 					</div>
 
 					<div>
-						<label className='block text-sm font-medium text-gray-700 mb-1'>
+						<label className='block text-sm font-medium text-gray-700 mb-2'>
 							Статус *
 						</label>
 						<select
 							{...register('status', { required: true })}
-							className='w-full px-4 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+							className='w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all appearance-none bg-select-chevron bg-no-repeat bg-right-2'
 						>
 							{Object.values(TaskStatus).map(status => (
 								<option key={status} value={status}>
@@ -263,7 +300,7 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 					</div>
 
 					<div className='flex-grow'>
-						<label className='block text-sm font-medium text-gray-700 mb-1'>
+						<label className='block text-sm font-medium text-gray-700 mb-2'>
 							Описание
 						</label>
 						<Edit
@@ -273,18 +310,18 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 					</div>
 				</div>
 
-				<div className='sticky bottom-0 bg-white pt-4 flex justify-end gap-2'>
+				<div className='sticky bottom-0 bg-white pt-6 pb-2 flex justify-end gap-3 border-t border-gray-100 mt-6'>
 					<button
 						type='button'
 						onClick={handleClose}
-						className='px-4 py-2 text-gray-700 hover:bg-gray-100 rounded'
+						className='px-5 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors duration-200 font-medium cursor-pointer'
 					>
 						Отмена
 					</button>
 					<button
 						type='submit'
 						disabled={isSubmitting}
-						className='px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed'
+						className='px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm hover:shadow-md transition-all font-medium disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer'
 					>
 						{isSubmitting ? 'Создание...' : 'Создать'}
 					</button>
