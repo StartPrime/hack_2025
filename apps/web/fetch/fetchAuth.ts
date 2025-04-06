@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { ILoginUser, IRegisterUser } from '@/interfaces'
 
-// const BASE_URL = 'https://hack2025.feryafox.ru/api'
+const BASE_URL = 'https://hack2025.feryafox.ru/api'
+// const BASE_URL = 'http://127.0.0.1:8080'
 
 export const useRegister = () => {
 	const [isLoading, setIsLoading] = useState(false)
@@ -15,14 +16,11 @@ export const useRegister = () => {
 
 		try {
 			const userData = { ...data, role: 'BUYER' }
-			const response = await fetch(
-				'https://hack2025.feryafox.ru/api/register',
-				{
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json;charset=utf-8' },
-					body: JSON.stringify(userData),
-				}
-			)
+			const response = await fetch(BASE_URL, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json;charset=utf-8' },
+				body: JSON.stringify(userData),
+			})
 
 			if (!response.ok) {
 				const message =
@@ -57,15 +55,12 @@ export const useLogin = () => {
 		setErrorMessage(null)
 
 		try {
-			const success = await fetch(
-				'https://hack2025.feryafox.ru/api/auth/login',
-				{
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json;charset=utf-8' },
-					body: JSON.stringify(data),
-					credentials: 'include',
-				}
-			)
+			const success = await fetch(BASE_URL, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json;charset=utf-8' },
+				body: JSON.stringify(data),
+				credentials: 'include',
+			})
 
 			if (!success.ok) {
 				const message =
