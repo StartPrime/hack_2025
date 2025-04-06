@@ -95,7 +95,7 @@ export default function TaskDialog({
 	}
 
 	useEffect(() => {
-		if (dialogRef.current?.open && taskId) {
+		if (dialogRef.current?.open || taskId) {
 			fetchTaskDetails()
 		} else {
 			setIsEditMode(false)
