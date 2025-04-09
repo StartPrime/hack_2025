@@ -147,7 +147,7 @@ export default function ArticleDialog({
 			className='fixed inset-0 m-auto p-0 w-full max-w-4xl max-h-[90vh] bg-white rounded-xl shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm overflow-auto animate-fade-in'
 		>
 			{!isEdit ? (
-				<div className='flex flex-col h-full'>
+				<div className='flex flex-col'>
 					{/* Шапка диалога */}
 					<div className='sticky top-0 z-10 bg-white p-4 border-b flex justify-between items-center'>
 						<h2 className='text-xl font-bold text-gray-800'>Просмотр статьи</h2>

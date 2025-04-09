@@ -115,7 +115,7 @@ export default function CreateTaskDialog({ dialogRef, onTaskCreated }: Props) {
 	const assignedTo = watch('assignedTo')
 
 	return (
-		<div className='flex flex-col h-full'>
+		<div className='flex flex-col'>
 			<div className='sticky top-0 z-10 bg-white p-4 border-b border-gray-200 flex justify-between items-center shadow-sm'>
 				<h2 className='text-xl font-semibold text-gray-900'>
 					Создание новой задачи
